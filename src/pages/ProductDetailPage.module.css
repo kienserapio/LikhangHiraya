@@ -1,0 +1,114 @@
+.hero {
+  position: relative;
+  border-radius: 26px;
+  min-height: 320px;
+  background: linear-gradient(160deg, rgba(132, 96, 70, 0.85), rgba(203, 138, 88, 0.9));
+  color: var(--color-white);
+  padding: 14px;
+}
+
+.back,
+.favorite {
+  border: 0;
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--color-white);
+}
+
+.favorite {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.heroMeta {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel {
+  margin-top: -28px;
+  border-top-left-radius: 32px;
+  border-top-right-radius: 32px;
+  background: var(--color-white);
+  padding: 18px;
+  position: relative;
+}
+
+.sizeRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sizeBtn {
+  flex: 1;
+  min-height: 42px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+}
+
+.activeSize {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+}
+
+.toppings {
+  border-top: 1px solid var(--color-border);
+}
+
+.toppingRow {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border);
+  padding: 10px 0;
+}
+
+.toppingRow div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toppingRow button {
+  border: 0;
+  background: #f2e7df;
+  min-height: 32px;
+  min-width: 32px;
+  border-radius: 999px;
+}
+
+.notesLabel {
+  margin-top: 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.notesLabel textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.cta {
+  margin-top: 14px;
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  min-height: 50px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+}

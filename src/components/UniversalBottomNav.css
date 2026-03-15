@@ -1,0 +1,78 @@
+.ubn-wrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid #f3f4f6;
+  z-index: 30;
+}
+
+.ubn-inner {
+  max-width: 430px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+}
+
+.ubn-tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: color 0.2s ease;
+}
+
+.ubn-tab:hover,
+.ubn-tab:active {
+  color: #9d6b4b;
+}
+
+.ubn-tab.active {
+  color: #9d6b4b;
+}
+
+.ubn-bar {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 4px;
+  background: #9d6b4b;
+  border-radius: 0 0 8px 8px;
+}
+
+.ubn-badge {
+  position: absolute;
+  top: -3px;
+  right: -7px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  background: #9d6b4b;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.ubn-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #a5e1ff 0%, #60a5fa 100%);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}

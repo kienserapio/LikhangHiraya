@@ -1,0 +1,54 @@
+.sectionTitle {
+  margin: 18px 0 12px;
+  color: var(--color-primary-dark);
+}
+
+.pills {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.pill {
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  border-radius: 999px;
+  min-height: 42px;
+  padding: 0 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.activePill {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+}
+
+.bottomTabs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  background: var(--color-white);
+  border-top: 1px solid var(--color-border);
+  padding: 8px 12px 16px;
+  z-index: 15;
+}
+
+.bottomTabs a {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  color: var(--color-muted);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.activeTab {
+  color: var(--color-primary);
+}
