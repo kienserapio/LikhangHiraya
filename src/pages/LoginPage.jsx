@@ -35,38 +35,65 @@ export default function LoginPage() {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Welcome Back</h1>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <input
-            className={styles.input}
-            placeholder="Username or Email"
-            value={form.usernameOrEmail}
-            onChange={(event) => setForm((prev) => ({ ...prev, usernameOrEmail: event.target.value }))}
-          />
-          {errors.usernameOrEmail ? <p className={styles.error}>{errors.usernameOrEmail[0]}</p> : null}
-
-          <input
-            type="password"
-            className={styles.input}
-            placeholder="Password"
-            value={form.password}
-            onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-          />
-          {errors.password ? <p className={styles.error}>{errors.password[0]}</p> : null}
-
-          <label>
-            <input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} /> Remember me
-          </label>
-
-          <button className={styles.submit} type="submit">Login</button>
-        </form>
-
-        <div className={styles.row}>
-          <Link className={styles.link} to="/forgot-password">Forgot Password?</Link>
-          <Link className={styles.link} to="/register">Create Account</Link>
-        </div>
+      <div className={`${styles.decorationContainer} ${styles.headerDecoration}`} aria-hidden="true">
+        <svg className={styles.decorationSvg} preserveAspectRatio="none" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,0 L500,0 L500,100 C420,160 300,50 180,130 C100,180 40,110 0,160 Z" fill="#a68f82" />
+        </svg>
+        <img className={styles.placeholderPattern} src="/assets/Background.png" alt="" />
       </div>
+
+      <div className={`${styles.decorationContainer} ${styles.footerDecoration}`} aria-hidden="true">
+        <svg className={styles.decorationSvg} preserveAspectRatio="none" viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,150 L500,150 L500,60 C420,120 300,10 180,90 C100,140 40,70 0,120 Z" fill="#a68f82" />
+        </svg>
+        <img className={styles.placeholderPattern} src="/assets/Background.png" alt="" />
+      </div>
+
+      <main className={styles.container}>
+        <header className={styles.header}>
+          <h1 className={styles.welcomeTitle}>Welcome back to<br />Likhang Hiraya!</h1>
+          <p className={styles.subtitle}>Login to your account.</p>
+        </header>
+
+        <div className={styles.card}>
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="usernameOrEmail">Username or Email:</label>
+              <input
+                id="usernameOrEmail"
+                className={styles.input}
+                value={form.usernameOrEmail}
+                onChange={(event) => setForm((prev) => ({ ...prev, usernameOrEmail: event.target.value }))}
+              />
+              {errors.usernameOrEmail ? <p className={styles.error}>{errors.usernameOrEmail[0]}</p> : null}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="password">Password:</label>
+              <input
+                id="password"
+                type="password"
+                className={styles.input}
+                value={form.password}
+                onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+              />
+              {errors.password ? <p className={styles.error}>{errors.password[0]}</p> : null}
+            </div>
+
+            <label className={styles.checkRow}>
+              <input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} />
+              <span>Remember me</span>
+            </label>
+
+            <button className={styles.submit} type="submit">Login</button>
+          </form>
+
+          <div className={styles.row}>
+            <Link className={styles.forgotLink} to="/forgot-password">Forgot Password?</Link>
+            <Link className={styles.link} to="/register">Sign up</Link>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

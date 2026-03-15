@@ -70,32 +70,79 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Create Account</h1>
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <input className={styles.input} placeholder="Full Name" onChange={(e) => handleChange("fullName", e.target.value)} />
-          {errors.fullName ? <p className={styles.error}>{errors.fullName[0]}</p> : null}
-          <input className={styles.input} placeholder="Email" onChange={(e) => handleChange("email", e.target.value)} />
-          {errors.email ? <p className={styles.error}>{errors.email[0]}</p> : null}
-          <input className={styles.input} placeholder="Phone (09XXXXXXXXX)" onChange={(e) => handleChange("phone", e.target.value)} />
-          {errors.phone ? <p className={styles.error}>{errors.phone[0]}</p> : null}
-          <input className={styles.input} placeholder="Username" onChange={(e) => handleChange("username", e.target.value)} />
-          {errors.username ? <p className={styles.error}>{errors.username[0]}</p> : null}
-          <input type="password" className={styles.input} placeholder="Password" onChange={(e) => handleChange("password", e.target.value)} />
-          {errors.password ? <p className={styles.error}>{errors.password[0]}</p> : null}
-          <input type="password" className={styles.input} placeholder="Confirm Password" onChange={(e) => handleChange("confirmPassword", e.target.value)} />
-          {errors.confirmPassword ? <p className={styles.error}>{errors.confirmPassword[0]}</p> : null}
-          <input className={styles.input} placeholder="Address" onChange={(e) => handleChange("address", e.target.value)} />
-          {errors.address ? <p className={styles.error}>{errors.address[0]}</p> : null}
-
-          <button className={styles.submit} type="submit">Register</button>
-        </form>
-
-        <div className={styles.row}>
-          <span>Already have an account?</span>
-          <Link className={styles.link} to="/login">Login</Link>
-        </div>
+      <div className={`${styles.decorationContainer} ${styles.headerDecoration}`} aria-hidden="true">
+        <svg className={styles.decorationSvg} preserveAspectRatio="none" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,0 L500,0 L500,100 C420,160 300,50 180,130 C100,180 40,110 0,160 Z" fill="#a68f82" />
+        </svg>
+        <img className={styles.placeholderPattern} src="/assets/Background.png" alt="" />
       </div>
+
+      <div className={`${styles.decorationContainer} ${styles.footerDecoration}`} aria-hidden="true">
+        <svg className={styles.decorationSvg} preserveAspectRatio="none" viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,150 L500,150 L500,60 C420,120 300,10 180,90 C100,140 40,70 0,120 Z" fill="#a68f82" />
+        </svg>
+        <img className={styles.placeholderPattern} src="/assets/Background.png" alt="" />
+      </div>
+
+      <main className={styles.container}>
+        <header className={styles.header}>
+          <h1 className={styles.welcomeTitle}>Welcome to<br />Likhang Hiraya!</h1>
+          <p className={styles.subtitle}>Create your account.</p>
+        </header>
+
+        <div className={styles.card}>
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="fullName">Full Name:</label>
+              <input id="fullName" className={styles.input} onChange={(e) => handleChange("fullName", e.target.value)} />
+              {errors.fullName ? <p className={styles.error}>{errors.fullName[0]}</p> : null}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="email">Email:</label>
+              <input id="email" className={styles.input} onChange={(e) => handleChange("email", e.target.value)} />
+              {errors.email ? <p className={styles.error}>{errors.email[0]}</p> : null}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="phone">Phone:</label>
+              <input id="phone" className={styles.input} placeholder="09XXXXXXXXX" onChange={(e) => handleChange("phone", e.target.value)} />
+              {errors.phone ? <p className={styles.error}>{errors.phone[0]}</p> : null}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="username">Username:</label>
+              <input id="username" className={styles.input} onChange={(e) => handleChange("username", e.target.value)} />
+              {errors.username ? <p className={styles.error}>{errors.username[0]}</p> : null}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="password">Password:</label>
+              <input id="password" type="password" className={styles.input} onChange={(e) => handleChange("password", e.target.value)} />
+              {errors.password ? <p className={styles.error}>{errors.password[0]}</p> : null}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="confirmPassword">Confirm Password:</label>
+              <input id="confirmPassword" type="password" className={styles.input} onChange={(e) => handleChange("confirmPassword", e.target.value)} />
+              {errors.confirmPassword ? <p className={styles.error}>{errors.confirmPassword[0]}</p> : null}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="address">Address:</label>
+              <input id="address" className={styles.input} onChange={(e) => handleChange("address", e.target.value)} />
+              {errors.address ? <p className={styles.error}>{errors.address[0]}</p> : null}
+            </div>
+
+            <button className={styles.submit} type="submit">Sign up</button>
+          </form>
+
+          <div className={styles.row}>
+            <span>Already have an account?</span>
+            <Link className={styles.link} to="/login">Login</Link>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
