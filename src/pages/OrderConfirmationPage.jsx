@@ -1,8 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./OrderConfirmationPage.css";
 
 export default function OrderConfirmationPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const orderId = location.state?.orderId;
 
   return (
     <div className="confirm-page" data-purpose="confirmation-screen">
@@ -24,7 +26,13 @@ export default function OrderConfirmationPage() {
       </section>
 
       <section className="confirm-footer" data-purpose="footer-actions">
-        <button className="track-btn" type="button" onClick={() => navigate("/order-status")}>Track Your Order</button>
+        <button
+          className="track-btn"
+          type="button"
+          onClick={() => navigate("/order-status", { state: orderId ? { orderId } : undefined })}
+        >
+          Track Your Order
+        </button>
       </section>
     </div>
   );

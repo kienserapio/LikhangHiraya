@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCartStore } from "../store/cartStore";
 import { useFavoriteStore } from "../store/favoriteStore";
-import { mockProducts } from "./mockProducts";
+import { productApi } from "../services/api";
 import "./ProductDetailPage.css";
 
 const sizes = ["Small", "Medium", "Large"];
@@ -15,14 +15,53 @@ function toPeso(value) {
 export default function ProductDetailPage() {
   const navigate = useNavigate();
   const { productId } = useParams();
+  const [products, setProducts] = useState([]);
+  const [loadError, setLoadError] = useState("");
+  const [selectedSize, setSelectedSize] = useState("Small");
+  const [notes] = useState("");
+  const [toppingQty, setToppingQty] = useState({});
   const addItem = useCartStore((state) => state.addItem);
   const isFavorite = useFavoriteStore((state) => state.isFavorite);
   const toggleFavorite = useFavoriteStore((state) => state.toggleFavorite);
-  const product = mockProducts.find((item) => item.id === productId) || mockProducts[0];
 
-  const [selectedSize, setSelectedSize] = useState("Small");
-  const [notes, setNotes] = useState("");
-  const [toppingQty, setToppingQty] = useState({ Chocolate: 1 });
+  useEffect(() => {
+    let isMounted = true;
+    productApi
+      .list()
+      .then((data) => {
+        if (isMounted) {
+          setProducts(data);
+          setLoadError("");
+        }
+      })
+      .catch((error) => {
+        if (isMounted) {
+          setProducts([]);
+          setLoadError(error.message || "Unable to load product details from backend.");
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const product = products.find((item) => String(item.id) === String(productId)) || products[0];
+
+  if (!product) {
+    return (
+      <div className="product-page">
+        <main className="product-main" style={{ padding: 24 }}>
+          <p style={{ color: loadError ? "#b91c1c" : "#6b7280", fontWeight: 700 }}>
+            {loadError || "Product not found."}
+          </p>
+          <button className="product-add-btn" onClick={() => navigate("/home")}>
+            <span>Back to Home</span>
+          </button>
+        </main>
+      </div>
+    );
+  }
 
   const toppingTotal = useMemo(
     () => Object.values(toppingQty).reduce((sum, qty) => sum + qty, 0),
@@ -90,7 +129,7 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="section">
-            <h2>Add Topping(1$)</h2>
+            <h2>Add Topping ({toPeso(1)} each)</h2>
             <div className="toppings">
               {toppings.map((name) => {
                 const qty = toppingQty[name] || 0;

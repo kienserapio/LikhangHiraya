@@ -1,0 +1,106 @@
+.page {
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(160deg, #fef8f2 0%, #fff 45%, #f5ebe1 100%);
+  display: grid;
+  place-items: center;
+}
+
+.container {
+  width: min(100%, 680px);
+  background: #fff;
+  border: 1px solid #eadbcb;
+  border-radius: 20px;
+  padding: clamp(18px, 4vw, 32px);
+  box-shadow: 0 18px 45px rgba(81, 46, 27, 0.15);
+  display: grid;
+  gap: 18px;
+}
+
+.header {
+  display: grid;
+  gap: 6px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #3f2515;
+  font-size: clamp(1.5rem, 3.6vw, 2rem);
+}
+
+.header p {
+  margin: 0;
+  color: #7a4a2a;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field span {
+  color: #5a3520;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.field input {
+  min-height: 44px;
+  border: 1px solid #d5beaa;
+  border-radius: 12px;
+  padding: 0 12px;
+}
+
+.field input:focus {
+  outline: 2px solid rgba(122, 74, 42, 0.25);
+  border-color: #7a4a2a;
+}
+
+.field small {
+  color: #b91c1c;
+  font-size: 0.78rem;
+}
+
+.help {
+  margin: 0;
+  color: #7a4a2a;
+  font-size: 0.78rem;
+}
+
+.field:nth-child(1),
+.field:nth-child(7) {
+  grid-column: 1 / -1;
+}
+
+.submit {
+  grid-column: 1 / -1;
+  border: 0;
+  min-height: 46px;
+  border-radius: 999px;
+  font-weight: 700;
+  background: #7a4a2a;
+  color: #fff;
+}
+
+.loginLink {
+  margin: 0;
+  text-align: center;
+  color: #5a3520;
+}
+
+.loginLink a {
+  color: #3f2515;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .form {
+    grid-template-columns: 1fr;
+  }
+}

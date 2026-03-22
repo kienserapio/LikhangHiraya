@@ -1,53 +1,32 @@
-const API_URL = import.meta.env.VITE_API_URL;
+import { localAuthApi, localOrderApi, localProductApi, localRiderApi } from "./localData";
 
-export async function apiRequest(path, options = {}) {
-  const token = localStorage.getItem("token");
-  const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-  };
-
-  const isAuthEndpoint = path.startsWith("/api/auth/");
-  if (token && !isAuthEndpoint) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  let response;
-  try {
-    response = await fetch(`${API_URL}${path}`, {
-      ...options,
-      headers,
-    });
-  } catch {
-    throw new Error("Cannot reach backend API. Make sure Spring Boot is running on " + API_URL);
-  }
-
-  if (!response.ok) {
-    let message = "Request failed";
-    try {
-      const payload = await response.json();
-      message = payload.message || message;
-    } catch {
-      const text = await response.text();
-      if (text) {
-        message = text;
-      }
-    }
-    throw new Error(message);
-  }
-
-  return response.json();
+export async function apiRequest() {
+  throw new Error("apiRequest is disabled in frontend-only mode.");
 }
 
 export const authApi = {
-  login: (payload) => apiRequest("/api/auth/login", { method: "POST", body: JSON.stringify(payload) }),
-  register: (payload) => apiRequest("/api/auth/register", { method: "POST", body: JSON.stringify(payload) }),
+  login: (payload) => localAuthApi.login(payload),
+  register: (payload) => localAuthApi.register(payload),
+  registerRider: (payload) => localAuthApi.registerRider(payload),
 };
 
 export const productApi = {
-  list: () => apiRequest("/api/products"),
+  list: () => localProductApi.list(),
 };
 
 export const orderApi = {
-  placeOrder: (payload) => apiRequest("/api/orders", { method: "POST", body: JSON.stringify(payload) }),
+  placeOrder: (payload) => localOrderApi.placeOrder(payload),
+  listMine: (scope = "active") => localOrderApi.listMine(scope),
+  clearMineActive: () => localOrderApi.clearMineActive(),
+};
+
+export const riderApi = {
+  dashboard: () => localRiderApi.dashboard(),
+  setAvailability: (payload) => localRiderApi.setAvailability(payload),
+  acceptOrder: (orderId) => localRiderApi.acceptOrder(orderId),
+  declineOrder: (orderId) => localRiderApi.declineOrder(orderId),
+  confirmPickup: (orderId) => localRiderApi.confirmPickup(orderId),
+  startTransit: (orderId) => localRiderApi.startTransit(orderId),
+  confirmArrival: (orderId) => localRiderApi.confirmArrival(orderId),
+  completeDelivery: (orderId) => localRiderApi.completeDelivery(orderId),
 };

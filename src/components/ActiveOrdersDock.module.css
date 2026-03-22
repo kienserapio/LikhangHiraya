@@ -1,0 +1,169 @@
+.dock {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 84px;
+  width: min(430px, calc(100% - 24px));
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #9d6b4b;
+  color: #ffffff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  z-index: 35;
+}
+
+.dockMeta {
+  font-size: 0.82rem;
+  color: #ebe3dc;
+  font-weight: 600;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.modal {
+  width: min(430px, 100%);
+  max-height: 70vh;
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.cancelButton {
+  border: 0;
+  min-height: 42px;
+  border-radius: 10px;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.cancelButton:disabled {
+  opacity: 0.6;
+}
+
+.modalHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.modalHead h2 {
+  margin: 0;
+  color: #111111;
+}
+
+.closeButton {
+  border: 0;
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: #111111;
+  font-weight: 700;
+}
+
+.ordersList {
+  overflow-y: auto;
+  display: grid;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+
+.orderCard {
+  border: 1px solid #f0e5db;
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.topLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #111111;
+  font-size: 0.85rem;
+}
+
+.topLine span {
+  color: #9d6b4b;
+  font-weight: 700;
+}
+
+.items {
+  display: grid;
+  gap: 6px;
+}
+
+.itemRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  color: #111111;
+  font-size: 0.84rem;
+}
+
+.itemRow p {
+  margin: 0;
+}
+
+.totalRow {
+  border-top: 1px dashed #eadbcb;
+  padding-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  color: #111111;
+}
+
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.step,
+.stepActive {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+.step {
+  color: #a5856f;
+}
+
+.stepActive {
+  color: #111111;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #d8c8bc;
+}
+
+.stepActive .dot {
+  background: #9d6b4b;
+}
+
+.step small,
+.stepActive small {
+  font-size: 0.68rem;
+}

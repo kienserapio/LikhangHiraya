@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-const DELIVERY_FEE = 50;
+const DELIVERY_FEE = 0;
 
 export const useCartStore = create((set, get) => ({
   isDrawerOpen: false,

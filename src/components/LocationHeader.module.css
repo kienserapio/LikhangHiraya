@@ -1,0 +1,89 @@
+.header {
+  padding: 1rem 1.5rem 1rem;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 20;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.locationWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.logo {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 999px;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: #111111;
+  font-size: 0.875rem;
+  min-width: 0;
+}
+
+.location span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.locationIcon {
+  color: #9d6b4b;
+  flex-shrink: 0;
+}
+
+.callButton {
+  border: 1px solid #f3f4f6;
+  background: #ffffff;
+  color: #111111;
+  border-radius: 9999px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+}
+
+.searchWrap {
+  margin-top: 1rem;
+  position: relative;
+}
+
+.searchWrap svg {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.searchWrap input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  color: #111111;
+  background: #ffffff;
+}
+
+.searchWrap input:focus {
+  outline: none;
+  border-color: #9d6b4b;
+  box-shadow: 0 0 0 2px rgba(157, 107, 75, 0.2);
+}

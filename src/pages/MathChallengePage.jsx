@@ -11,6 +11,7 @@ export default function MathChallengePage() {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const verifyMfa = useAuthStore((state) => state.verifyMfa);
+  const getPostMfaRoute = useAuthStore((state) => state.getPostMfaRoute);
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState("");
 
@@ -34,7 +35,7 @@ export default function MathChallengePage() {
       return;
     }
     verifyMfa();
-    navigate("/home", { replace: true });
+    navigate(getPostMfaRoute(), { replace: true });
   }
 
   return (

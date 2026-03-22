@@ -4,9 +4,16 @@ import { z } from "zod";
 import { useAuthStore } from "../store/authStore";
 import styles from "./Auth.module.css";
 
+const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+
 const loginSchema = z.object({
   usernameOrEmail: z.string().min(1, "Username or email is required"),
-  password: z.string().min(1, "Password is required"),
+  password: z
+    .string()
+    .regex(
+      strongPasswordPattern,
+      "Password must be at least 8 chars and include uppercase, lowercase, number, and special character"
+    ),
 });
 
 export default function LoginPage() {
@@ -14,6 +21,7 @@ export default function LoginPage() {
   const login = useAuthStore((state) => state.login);
   const rememberMeUsername = useAuthStore((state) => state.rememberMeUsername);
   const [form, setForm] = useState({ usernameOrEmail: rememberMeUsername || "", password: "" });
+  const [loginAsRole, setLoginAsRole] = useState("CUSTOMER");
   const [rememberMe, setRememberMe] = useState(Boolean(rememberMeUsername));
   const [errors, setErrors] = useState({});
 
@@ -26,7 +34,7 @@ export default function LoginPage() {
     }
 
     try {
-      await login(form, rememberMe);
+      await login(form, rememberMe, loginAsRole);
       navigate("/mfa");
     } catch (error) {
       setErrors({ password: [error.message || "Invalid credentials"] });
@@ -77,6 +85,9 @@ export default function LoginPage() {
                 value={form.password}
                 onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
               />
+              <p className={styles.subtitle} style={{ marginTop: 4, fontSize: "0.82rem" }}>
+                Must be 8+ chars with uppercase, lowercase, number, and special character.
+              </p>
               {errors.password ? <p className={styles.error}>{errors.password[0]}</p> : null}
             </div>
 
@@ -85,12 +96,27 @@ export default function LoginPage() {
               <span>Remember me</span>
             </label>
 
+            <div className={styles.field}>
+              <label className={styles.label}>Login as:</label>
+              <select
+                className={styles.input}
+                value={loginAsRole}
+                onChange={(event) => setLoginAsRole(event.target.value)}
+              >
+                <option value="CUSTOMER">Customer</option>
+                <option value="RIDER">Delivery Rider</option>
+              </select>
+            </div>
+
             <button className={styles.submit} type="submit">Login</button>
           </form>
 
           <div className={styles.row}>
             <Link className={styles.forgotLink} to="/forgot-password">Forgot Password?</Link>
             <Link className={styles.link} to="/register">Sign up</Link>
+          </div>
+          <div className={styles.row} style={{ marginTop: 8 }}>
+            <Link className={styles.link} to="/rider-signup">Sign up as Delivery Rider</Link>
           </div>
         </div>
       </main>

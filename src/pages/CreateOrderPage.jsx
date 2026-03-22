@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "../store/cartStore";
 import { useAuthStore } from "../store/authStore";
+import { createActiveOrder } from "../services/activeOrders";
 import "./CreateOrderPage.css";
 
 function toPeso(value) {
@@ -11,12 +12,40 @@ function toPeso(value) {
 export default function CreateOrderPage() {
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const items = useCartStore((state) => state.items);
   const increment = useCartStore((state) => state.increment);
   const decrement = useCartStore((state) => state.decrement);
+  const clear = useCartStore((state) => state.clear);
   const subtotal = useCartStore((state) => state.subtotal());
+  const total = useCartStore((state) => state.total());
   const profile = useAuthStore((state) => state.profile);
-  const canCreateOrder = items.length > 0 && paymentMethod !== "";
+  const canCreateOrder = items.length > 0 && paymentMethod !== "" && !isSubmitting;
+
+  async function handleCreateOrder() {
+    if (!canCreateOrder) {
+      return;
+    }
+
+    setSubmitError("");
+    setIsSubmitting(true);
+    try {
+      const created = await createActiveOrder({
+        profile,
+        items,
+        paymentMethod,
+        subtotal,
+        total,
+      });
+      clear();
+      navigate("/order-confirmation", { state: { orderId: created.orderId } });
+    } catch (error) {
+      setSubmitError(error.message || "Unable to create order");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <div className="create-order">
@@ -71,16 +100,17 @@ export default function CreateOrderPage() {
           </div>
         </div>
 
-        <div className="total-wrap"><p>Total: {toPeso(subtotal)}</p></div>
+        <div className="total-wrap"><p>Total: {toPeso(total)}</p></div>
+        {submitError ? <p style={{ color: "#b91c1c", margin: "6px 0 0", fontWeight: 600 }}>{submitError}</p> : null}
       </main>
 
       <button
         className={`create-footer ${canCreateOrder ? "" : "disabled"}`}
-        onClick={() => navigate("/order-confirmation")}
+        onClick={handleCreateOrder}
         disabled={!canCreateOrder}
         aria-disabled={!canCreateOrder}
       >
-        <span>Create Order</span>
+        <span>{isSubmitting ? "Creating Order..." : "Create Order"}</span>
         <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
       </button>
     </div>

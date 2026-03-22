@@ -47,7 +47,7 @@ export default function ProfilePage() {
                 <Icon>📞</Icon>
                 <span className="setting-text">{profile.phone || "+380483746375"}</span>
               </div>
-              <button className="icon-btn" onClick={() => editField("phone", "phone")} aria-label="Edit phone"><Icon>✎</Icon></button>
+              <button className="icon-btn" onClick={() => editField("phone", "phone")} aria-label="Edit phone"><Icon>›</Icon></button>
             </div>
 
             <div className="setting-row">
@@ -55,7 +55,15 @@ export default function ProfilePage() {
                 <Icon>📍</Icon>
                 <span className="setting-text">{profile.address || "Ukraine, Ivano-Frankivsk, Kon..."}</span>
               </div>
-              <button className="icon-btn" onClick={() => editField("address", "address")} aria-label="Edit address"><Icon>✎</Icon></button>
+              <button className="icon-btn" onClick={() => editField("address", "address")} aria-label="Edit address"><Icon>›</Icon></button>
+            </div>
+
+            <div className="setting-row">
+              <div className="setting-left">
+                <Icon>⚙️</Icon>
+                <span className="setting-text">Settings</span>
+              </div>
+              <button className="icon-btn" onClick={() => navigate("/settings")} aria-label="Open settings"><Icon>›</Icon></button>
             </div>
 
             <div className="setting-row">
@@ -66,7 +74,7 @@ export default function ProfilePage() {
                 </div>
                 <span className="setting-text">My Cart ({cartCount})</span>
               </div>
-              <button className="icon-btn" onClick={() => navigate("/cart")} aria-label="Go to cart"><Icon>✎</Icon></button>
+              <button className="icon-btn" onClick={() => navigate("/cart")} aria-label="Go to cart"><Icon>›</Icon></button>
             </div>
 
             <div className="logout-wrap">

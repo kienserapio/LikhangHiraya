@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import AppShell from "../components/AppShell";
-import { supabase } from "../services/supabaseClient";
+import { findOrderById, subscribeLocalData } from "../services/localData";
 import styles from "./TrackingPage.module.css";
 
 const statuses = [
@@ -20,26 +20,25 @@ export default function TrackingPage() {
   const [status, setStatus] = useState(location.state?.status || "PENDING");
 
   useEffect(() => {
-    if (!orderId) return undefined;
+    if (!orderId) {
+      return undefined;
+    }
 
-    const channel = supabase
-      .channel("orders-tracking")
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "orders",
-          filter: `id=eq.${orderId}`,
-        },
-        (payload) => {
-          setStatus(payload.new.status);
-        }
-      )
-      .subscribe();
+    let mounted = true;
+    const refresh = async () => {
+      const order = await findOrderById(orderId.trim());
+      if (!mounted || !order) {
+        return;
+      }
+      setStatus(order.status);
+    };
+
+    refresh();
+    const unsubscribe = subscribeLocalData(refresh);
 
     return () => {
-      supabase.removeChannel(channel);
+      mounted = false;
+      unsubscribe();
     };
   }, [orderId]);
 
