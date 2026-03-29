@@ -12,7 +12,7 @@ const loginSchema = z.object({
     .string()
     .regex(
       strongPasswordPattern,
-      "Password must be at least 8 chars and include uppercase, lowercase, number, and special character"
+      "Password must be at least 8 characters and include uppercase, lowercase, number, and special character"
     ),
 });
 
@@ -60,7 +60,7 @@ export default function LoginPage() {
       <main className={styles.container}>
         <header className={styles.header}>
           <h1 className={styles.welcomeTitle}>Welcome back to<br />Likhang Hiraya!</h1>
-          <p className={styles.subtitle}>Login to your account.</p>
+          <p className={`${styles.subtitle} ${styles.loginHeaderSubtitle}`}>Login to your account.</p>
         </header>
 
         <div className={styles.card}>
@@ -86,7 +86,7 @@ export default function LoginPage() {
                 onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
               />
               <p className={styles.subtitle} style={{ marginTop: 4, fontSize: "0.82rem" }}>
-                Must be 8+ chars with uppercase, lowercase, number, and special character.
+                Must be 8+ characters with uppercase, lowercase, number, and special character.
               </p>
               {errors.password ? <p className={styles.error}>{errors.password[0]}</p> : null}
             </div>
@@ -105,6 +105,7 @@ export default function LoginPage() {
               >
                 <option value="CUSTOMER">Customer</option>
                 <option value="RIDER">Delivery Rider</option>
+                <option value="ADMIN">Admin</option>
               </select>
             </div>
 

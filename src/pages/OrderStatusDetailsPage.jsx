@@ -1,15 +1,92 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useOrderTracking } from "../hooks/useOrderTracking";
+import { orderApi } from "../services/api";
 import "./OrderStatusDetailsPage.css";
 
-const timeline = [
-  { title: "Order Confirmed", date: "20-12-2022", time: "11.00PM", icon: "📦", active: true },
-  { title: "Order Processed", date: "20-12-2022", time: "10.00PM", icon: "🎯", active: false },
-  { title: "On Delivery", date: "20-12-2022", time: "12.00PM", icon: "🚚", active: false },
-  { title: "Order Completed", date: ".......", time: "", icon: "👍", active: false },
+const timelineTemplate = [
+  { title: "Order Confirmed", icon: "📦" },
+  { title: "Order Processed", icon: "🎯" },
+  { title: "On Delivery", icon: "🚚" },
+  { title: "Order Completed", icon: "👍" },
 ];
+
+function statusToTimelineIndex(status) {
+  if (status === "CONFIRMED") {
+    return 0;
+  }
+  if (status === "PREPARING") {
+    return 1;
+  }
+  if (status === "RIDER_ASSIGNED" || status === "PICKED_UP" || status === "IN_TRANSIT" || status === "ARRIVED") {
+    return 2;
+  }
+  if (status === "DELIVERED") {
+    return 3;
+  }
+  return -1;
+}
+
+function formatTimelineDateTime(value) {
+  if (!value) {
+    return { date: ".......", time: "" };
+  }
+
+  const date = new Date(value);
+  return {
+    date: new Intl.DateTimeFormat("en-PH", { month: "2-digit", day: "2-digit", year: "numeric" }).format(date),
+    time: new Intl.DateTimeFormat("en-PH", { hour: "numeric", minute: "2-digit" }).format(date),
+  };
+}
 
 export default function OrderStatusDetailsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [trackedOrderId, setTrackedOrderId] = useState(location.state?.orderId || "");
+
+  useEffect(() => {
+    if (trackedOrderId) {
+      return undefined;
+    }
+
+    let mounted = true;
+    orderApi
+      .listMine("active")
+      .then((orders) => {
+        if (!mounted) {
+          return;
+        }
+        if (Array.isArray(orders) && orders.length > 0) {
+          setTrackedOrderId(orders[0].orderId || orders[0].id || "");
+        }
+      })
+      .catch(() => {
+        if (!mounted) {
+          return;
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [trackedOrderId]);
+
+  const { order } = useOrderTracking(trackedOrderId);
+
+  const timeline = useMemo(() => {
+    const activeIndex = statusToTimelineIndex(order?.status);
+    const confirmed = formatTimelineDateTime(order?.acceptedAt || order?.createdAt);
+    const processed = formatTimelineDateTime(order?.acceptedAt || order?.createdAt);
+    const onDelivery = formatTimelineDateTime(order?.pickedUpAt || order?.arrivedAt || order?.deliveredAt);
+    const completed = formatTimelineDateTime(order?.deliveredAt);
+
+    const entries = [confirmed, processed, onDelivery, completed];
+    return timelineTemplate.map((item, index) => ({
+      ...item,
+      ...entries[index],
+      active: index <= activeIndex,
+    }));
+  }, [order]);
 
   return (
     <div className="order-status">

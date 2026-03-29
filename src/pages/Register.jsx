@@ -16,7 +16,7 @@ const registerSchema = z
       .string()
       .regex(
         strongPasswordPattern,
-        "Password must be at least 8 chars and include uppercase, lowercase, number, and special character"
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character"
       ),
     confirmPassword: z.string().min(8),
     address: z.string().min(8, "Address is required"),
@@ -121,7 +121,7 @@ export default function Register() {
           <label className={styles.field}>
             <span>Password</span>
             <input type="password" value={form.password} onChange={(event) => handleChange("password", event.target.value)} />
-            <p className={styles.help}>8+ chars with uppercase, lowercase, number, and special character.</p>
+            <p className={styles.help}>8+ characters with uppercase, lowercase, number, and special character.</p>
             {errors.password ? <small>{errors.password[0]}</small> : null}
           </label>
 

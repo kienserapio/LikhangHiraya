@@ -73,6 +73,10 @@
   font-weight: 400;
 }
 
+.loginHeaderSubtitle {
+  color: #1a202c;
+}
+
 .card {
   width: 100%;
   background: #ffffff;

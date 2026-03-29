@@ -10,7 +10,7 @@ const registerSchema = z
     email: z.string().email("Invalid email"),
     phone: z.string().regex(/^09\d{9}$/, "Use 09XXXXXXXXX"),
     username: z.string().min(4, "Username must be at least 4 chars"),
-    password: z.string().min(8, "Password must be at least 8 chars"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(8),
     address: z.string().min(8, "Address is required"),
   })

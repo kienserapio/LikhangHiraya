@@ -7,6 +7,11 @@ import "./ProductDetailPage.css";
 
 const sizes = ["Small", "Medium", "Large"];
 const toppings = ["Caramel", "Banana", "Chocolate", "Strawberry"];
+const sizePriceModifiers = {
+  Small: 0,
+  Medium: 20,
+  Large: 40,
+};
 
 function toPeso(value) {
   return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(value);
@@ -68,7 +73,8 @@ export default function ProductDetailPage() {
     [toppingQty]
   );
 
-  const total = product.pricePhp + toppingTotal;
+  const sizePrice = Number(product.pricePhp || 0) + Number(sizePriceModifiers[selectedSize] || 0);
+  const total = sizePrice + toppingTotal;
 
   function changeTopping(name, delta) {
     setToppingQty((prev) => {
@@ -121,6 +127,10 @@ export default function ProductDetailPage() {
                 </button>
               ))}
             </div>
+            <div className="size-price-preview" aria-live="polite">
+              <span className="size-price-label">{selectedSize} price</span>
+              <strong key={`${product.id}-${selectedSize}`} className="size-price-value">{toPeso(sizePrice)}</strong>
+            </div>
           </div>
 
           <div className="section">
@@ -155,7 +165,7 @@ export default function ProductDetailPage() {
             <button
               className="product-add-btn"
               onClick={() => {
-                addItem({ ...product, name: `${product.name} (${selectedSize})`, pricePhp: total }, 1, notes);
+                addItem({ ...product, name: `${product.name} (${selectedSize})`, pricePhp: total, selectedSize }, 1, notes);
                 navigate("/cart");
               }}
             >

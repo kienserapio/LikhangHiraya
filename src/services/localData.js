@@ -490,7 +490,7 @@ export const localAuthApi = {
     if (!user) {
       user = {
         id: makeId("usr"),
-        fullName: preferredRole === "RIDER" ? "New Rider" : "New Customer",
+        fullName: preferredRole === "RIDER" ? "New Rider" : preferredRole === "ADMIN" ? "New Admin" : "New Customer",
         email: `${usernameOrEmail || "user"}@local.dev`,
         phone: "",
         username: usernameOrEmail || `${preferredRole.toLowerCase()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -582,15 +582,20 @@ export const localOrderApi = {
   async placeOrder(payload) {
     ensureLocalSeedData();
     const { username, profile } = currentUserSnapshot();
+    const parsedNotes = parseSpecialNotes(payload.specialNotes);
     const productsById = new Map(mockProducts.map((item) => [String(item.id), item]));
+    const notedItemsById = new Map(
+      (parsedNotes.items || []).map((item) => [String(item.id), item])
+    );
 
     const items = (payload.items || []).map((item) => {
       const product = productsById.get(String(item.productId));
-      const unitPrice = Number(item.unitPrice ?? product?.pricePhp ?? 0);
+      const notedItem = notedItemsById.get(String(item.productId));
+      const unitPrice = Number(item.unitPrice ?? notedItem?.unitPrice ?? product?.pricePhp ?? 0);
       const quantity = Number(item.quantity || 0);
       return {
         productId: String(item.productId),
-        productName: product?.name || "Unknown Product",
+        productName: notedItem?.name || product?.name || "Unknown Product",
         quantity,
         unitPrice,
         subtotal: unitPrice * quantity,
@@ -598,7 +603,7 @@ export const localOrderApi = {
     });
 
     const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
-  const deliveryFee = 0;
+    const deliveryFee = 0;
     const nextOrder = {
       orderId: makeId("ord"),
       customerUsername: username,

@@ -19,6 +19,10 @@ import RiderSignupPage from "./pages/rider/RiderSignupPage";
 import RiderDashboardPage from "./pages/rider/RiderDashboardPage";
 import RiderActiveDeliveryPage from "./pages/rider/RiderActiveDeliveryPage";
 import RiderEarningsHistoryPage from "./pages/rider/RiderEarningsHistoryPage";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboardPage from "./pages/admin/Dashboard";
+import AdminInventoryPage from "./pages/admin/Inventory";
+import AdminAnalyticsPage from "./pages/admin/Analytics";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
@@ -48,6 +52,13 @@ export default function App() {
       <Route path="/rider/dashboard" element={<ProtectedRoute requireMfa allowedRoles={["RIDER"]}><RiderDashboardPage /></ProtectedRoute>} />
       <Route path="/rider/active" element={<ProtectedRoute requireMfa allowedRoles={["RIDER"]}><RiderActiveDeliveryPage /></ProtectedRoute>} />
       <Route path="/rider/history" element={<ProtectedRoute requireMfa allowedRoles={["RIDER"]}><RiderEarningsHistoryPage /></ProtectedRoute>} />
+
+      <Route path="/admin" element={<ProtectedRoute requireMfa allowedRoles={["ADMIN"]}><AdminLayout /></ProtectedRoute>}>
+        <Route index element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboardPage />} />
+        <Route path="inventory" element={<AdminInventoryPage />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
+      </Route>
     </Routes>
   );
 }

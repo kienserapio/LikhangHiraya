@@ -1,5 +1,5 @@
 import { riderApi } from "./api";
-import { subscribeLocalData } from "./localData";
+import { supabase } from "./supabaseClient";
 
 export async function fetchRiderDashboard() {
   return riderApi.dashboard();
@@ -31,5 +31,20 @@ export async function completeRiderDelivery(orderId) {
 }
 
 export function subscribeToRiderOrders(onRefresh) {
-  return subscribeLocalData(onRefresh);
+  const channel = supabase
+    .channel(`rider-orders-${Date.now()}`)
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, () => {
+      onRefresh();
+    })
+    .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, () => {
+      onRefresh();
+    })
+    .on("postgres_changes", { event: "DELETE", schema: "public", table: "orders" }, () => {
+      onRefresh();
+    })
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }

@@ -19,6 +19,17 @@ function mapsLink(address) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
 
+function normalizeRiderItem(item) {
+  const quantity = Number(item?.quantity || 0);
+  const unitPrice = Number(item?.unitPrice || item?.unit_price || 0);
+  return {
+    key: String(item?.productId || item?.product_id || item?.id || "unknown"),
+    name: item?.productName || item?.product_name || item?.name || "Unnamed Product",
+    quantity,
+    subtotal: Number(item?.subtotal || unitPrice * quantity),
+  };
+}
+
 function activeStepFromStatus(status) {
   if (status === "RIDER_ASSIGNED") {
     return 0;
@@ -145,12 +156,15 @@ export default function RiderActiveDeliveryPage() {
           </div>
 
           <div className={styles.items}>
-            {(activeOrder.items || []).map((item) => (
-              <div className={styles.item} key={`${activeOrder.orderId}-${item.productId}`}>
-                <span>{item.quantity}x {item.productName}</span>
-                <span>{toPeso(item.subtotal)}</span>
-              </div>
-            ))}
+            {(activeOrder.items || []).map((rawItem, index) => {
+              const item = normalizeRiderItem(rawItem);
+              return (
+                <div className={styles.item} key={`${activeOrder.orderId}-${item.key}-${index}`}>
+                  <span>{item.quantity}x {item.name}</span>
+                  <span>{toPeso(item.subtotal)}</span>
+                </div>
+              );
+            })}
           </div>
 
           {etaLabel ? <p className={styles.subtitle} style={{ marginTop: 12 }}>{etaLabel}</p> : null}

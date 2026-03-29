@@ -61,7 +61,14 @@ export const useAuthStore = create((set, get) => ({
   error: "",
 
   getPostMfaRoute() {
-    return get().user?.role === "RIDER" ? "/rider/dashboard" : "/home";
+    const role = get().user?.role;
+    if (role === "RIDER") {
+      return "/rider/dashboard";
+    }
+    if (role === "ADMIN") {
+      return "/admin/dashboard";
+    }
+    return "/home";
   },
 
   setRememberMe(username, enabled) {

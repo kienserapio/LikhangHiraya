@@ -16,7 +16,7 @@ const schema = z
       .string()
       .regex(
         strongPasswordPattern,
-        "Password must be at least 8 chars and include uppercase, lowercase, number, and special character"
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character"
       ),
     confirmPassword: z.string().min(8),
     address: z.string().min(8, "Address is required"),

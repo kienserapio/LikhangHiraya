@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { clearActiveOrders, getActiveOrders, subscribeToActiveOrders } from "../services/activeOrders";
 import styles from "./ActiveOrdersDock.module.css";
@@ -24,6 +24,8 @@ export default function ActiveOrdersDock() {
   const [orderIds, setOrderIds] = useState([]);
   const [isOpen, setIsOpen] = useState(Boolean(location.state?.openActiveOrders));
   const [isClearing, setIsClearing] = useState(false);
+  const latestTrackedOrderIdsRef = useRef(new Set());
+  const deliveredAlertedRef = useRef(new Set());
 
   const loadOrders = useCallback(async () => {
     try {
@@ -39,18 +41,36 @@ export default function ActiveOrdersDock() {
   }, []);
 
   useEffect(() => {
+    latestTrackedOrderIdsRef.current = new Set((orderIds || []).map((id) => String(id)));
+  }, [orderIds]);
+
+  const handleDeliveredOrder = useCallback((orderId) => {
+    const normalizedOrderId = String(orderId || "");
+    if (!normalizedOrderId) {
+      return;
+    }
+    if (!latestTrackedOrderIdsRef.current.has(normalizedOrderId)) {
+      return;
+    }
+    if (deliveredAlertedRef.current.has(normalizedOrderId)) {
+      return;
+    }
+
+    deliveredAlertedRef.current.add(normalizedOrderId);
+    window.alert("Order completed successfully.");
+    setIsOpen(false);
+  }, []);
+
+  useEffect(() => {
     let cleanup = () => {};
 
     (async () => {
       const ids = await loadOrders();
-      if (ids.length === 0) {
-        return;
-      }
-      cleanup = subscribeToActiveOrders(ids, loadOrders);
+      cleanup = subscribeToActiveOrders(ids, loadOrders, handleDeliveredOrder);
     })();
 
     return () => cleanup();
-  }, [loadOrders]);
+  }, [handleDeliveredOrder, loadOrders]);
 
   const activeCount = useMemo(() => orderIds.length || orders.length, [orderIds.length, orders.length]);
   const productCount = useMemo(

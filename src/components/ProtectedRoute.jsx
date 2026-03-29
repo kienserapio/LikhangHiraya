@@ -19,6 +19,9 @@ export default function ProtectedRoute({ children, requireMfa = false, allowedRo
     if (user.role === "RIDER") {
       return <Navigate to="/rider/dashboard" replace />;
     }
+    if (user.role === "ADMIN") {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
     return <Navigate to="/home" replace />;
   }
 

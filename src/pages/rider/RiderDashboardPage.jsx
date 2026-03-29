@@ -1,17 +1,28 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   acceptRiderOrder,
   declineRiderOrder,
   fetchRiderDashboard,
-  setRiderOnline,
   subscribeToRiderOrders,
 } from "../../services/riderApi";
+import { useNewOrders } from "../../hooks/useNewOrders";
 import { useAuthStore } from "../../store/authStore";
 import styles from "./RiderPages.module.css";
 
 function toPeso(value) {
   return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(Number(value || 0));
+}
+
+function normalizeRiderItem(item) {
+  const quantity = Number(item?.quantity || 0);
+  const unitPrice = Number(item?.unitPrice || item?.unit_price || 0);
+  return {
+    key: String(item?.productId || item?.product_id || item?.id || "unknown"),
+    name: item?.productName || item?.product_name || item?.name || "Unnamed Product",
+    quantity,
+    subtotal: Number(item?.subtotal || unitPrice * quantity),
+  };
 }
 
 export default function RiderDashboardPage() {
@@ -22,17 +33,17 @@ export default function RiderDashboardPage() {
   const [secondsLeft, setSecondsLeft] = useState(30);
   const incomingOrder = dashboard?.incomingOrder || null;
 
-  async function loadDashboard() {
+  const loadDashboard = useCallback(async () => {
     const next = await fetchRiderDashboard();
-    setDashboard(next);
-  }
+    setDashboard({ ...next, online: true });
+  }, []);
 
   useEffect(() => {
     let mounted = true;
     fetchRiderDashboard()
       .then((next) => {
         if (mounted) {
-          setDashboard(next);
+          setDashboard({ ...next, online: true });
         }
       })
       .finally(() => {
@@ -70,17 +81,16 @@ export default function RiderDashboardPage() {
   useEffect(() => {
     const cleanup = subscribeToRiderOrders(loadDashboard);
     return cleanup;
-  }, []);
+  }, [loadDashboard]);
+
+  useNewOrders({
+    enabled: true,
+    onIncoming: () => {
+      loadDashboard();
+    },
+  });
 
   const timerPercent = useMemo(() => Math.max(0, (secondsLeft / 30) * 100), [secondsLeft]);
-
-  async function handleToggleOnline() {
-    if (!dashboard) {
-      return;
-    }
-    const next = await setRiderOnline(!dashboard.online, dashboard.workingShift || "MORNING");
-    setDashboard(next);
-  }
 
   async function handleAccept() {
     if (!incomingOrder) {
@@ -103,17 +113,10 @@ export default function RiderDashboardPage() {
             <div>
               <h1>Rider Dashboard</h1>
               <p className={styles.subtitle}>
-                {dashboard?.online ? "Waiting for orders..." : "You are currently Offline."}
+                Waiting for orders...
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleToggleOnline}
-            className={`${styles.toggle} ${dashboard?.online ? styles.toggleOnline : ""}`}
-          >
-            {dashboard?.online ? "Go Offline" : "Go Online"}
-          </button>
         </header>
 
         <section className={styles.earningsCard}>
@@ -141,7 +144,7 @@ export default function RiderDashboardPage() {
           </div>
         </section>
 
-        {dashboard?.online && incomingOrder ? (
+        {incomingOrder ? (
           <section className={styles.card}>
             <h2 style={{ margin: 0 }}>Incoming Order</h2>
             <div className={styles.grid}>
@@ -160,12 +163,15 @@ export default function RiderDashboardPage() {
             </div>
 
             <div className={styles.items}>
-              {incomingOrder.items.map((item) => (
-                <div className={styles.item} key={`${incomingOrder.orderId}-${item.productId}`}>
-                  <span>{item.quantity}x {item.productName}</span>
-                  <span>{toPeso(item.subtotal)}</span>
-                </div>
-              ))}
+              {(incomingOrder.items || []).map((rawItem, index) => {
+                const item = normalizeRiderItem(rawItem);
+                return (
+                  <div className={styles.item} key={`${incomingOrder.orderId}-${item.key}-${index}`}>
+                    <span>{item.quantity}x {item.name}</span>
+                    <span>{toPeso(item.subtotal)}</span>
+                  </div>
+                );
+              })}
             </div>
 
             <div className={styles.timerWrap}>
@@ -183,9 +189,7 @@ export default function RiderDashboardPage() {
         ) : (
           <section className={styles.card}>
             <p className={styles.subtitle} style={{ margin: 0 }}>
-              {dashboard?.online
-                ? "No incoming order right now. Keep your app open for realtime assignments."
-                : "Turn online when you are ready to receive delivery tasks."}
+              No incoming order right now. Keep your app open for realtime assignments.
             </p>
           </section>
         )}
