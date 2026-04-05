@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: #f8f6f3;
   color: #111827;
-  padding: 20px 16px 34px;
+  padding: 20px 16px 104px;
 }
 
 .shell {
@@ -246,6 +246,41 @@
   border-bottom: 1px solid #efe8e2;
 }
 
+.pendingSection {
+  border-color: #e7ddd3;
+}
+
+.pendingTitle {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.pendingList {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.pendingCard {
+  border: 1px solid #efe7df;
+  border-radius: 12px;
+  background: #fcfaf7;
+  padding: 12px;
+}
+
+.pendingHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.pendingHead span {
+  color: #846046;
+  font-weight: 700;
+}
+
 .linkBtn {
   color: #846046;
   font-weight: 700;
@@ -256,6 +291,10 @@
 }
 
 @media (max-width: 760px) {
+  .page {
+    padding-bottom: 94px;
+  }
+
   .grid,
   .metricRow {
     grid-template-columns: 1fr;

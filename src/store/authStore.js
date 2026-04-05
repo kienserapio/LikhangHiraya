@@ -4,6 +4,7 @@ import { authApi } from "../services/api";
 const AUTH_BYPASS = import.meta.env.VITE_AUTH_BYPASS === "true";
 const PROFILE_KEY = "lh_profile";
 const AUTH_USER_KEY = "lh_auth_user";
+const REMEMBER_ME_KEY = "lh_remember_me_username";
 
 function loadProfile() {
   try {
@@ -51,17 +52,31 @@ function saveAuthUser(user) {
   localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
 }
 
+function loadRememberMeUsername() {
+  const persisted = localStorage.getItem(REMEMBER_ME_KEY);
+  if (persisted) {
+    return persisted;
+  }
+
+  const legacySessionValue = sessionStorage.getItem("rememberMeUsername") || "";
+  if (legacySessionValue) {
+    localStorage.setItem(REMEMBER_ME_KEY, legacySessionValue);
+    sessionStorage.removeItem("rememberMeUsername");
+  }
+  return legacySessionValue;
+}
+
 export const useAuthStore = create((set, get) => ({
   user: loadAuthUser(),
   profile: loadProfile(),
   token: localStorage.getItem("token") || "",
-  rememberMeUsername: sessionStorage.getItem("rememberMeUsername") || "",
+  rememberMeUsername: loadRememberMeUsername(),
   mfaVerified: sessionStorage.getItem("mfaVerified") === "true",
   isLoading: false,
   error: "",
 
   getPostMfaRoute() {
-    const role = get().user?.role;
+    const role = String(get().user?.role || "").toUpperCase();
     if (role === "RIDER") {
       return "/rider/dashboard";
     }
@@ -73,20 +88,25 @@ export const useAuthStore = create((set, get) => ({
 
   setRememberMe(username, enabled) {
     if (enabled) {
-      sessionStorage.setItem("rememberMeUsername", username);
+      localStorage.setItem(REMEMBER_ME_KEY, username);
       set({ rememberMeUsername: username });
       return;
     }
+    localStorage.removeItem(REMEMBER_ME_KEY);
     sessionStorage.removeItem("rememberMeUsername");
     set({ rememberMeUsername: "" });
   },
 
-  async login(payload, rememberMe, preferredRole = "CUSTOMER") {
+  async login(payload, rememberMe) {
     set({ isLoading: true, error: "" });
 
     if (AUTH_BYPASS) {
       const username = payload.usernameOrEmail?.trim() || "guest";
-      const selectedRole = preferredRole || "CUSTOMER";
+      const selectedRole = username.toLowerCase().includes("admin")
+        ? "ADMIN"
+        : username.toLowerCase().includes("rider")
+          ? "RIDER"
+          : "CUSTOMER";
       const profile = {
         ...get().profile,
         username,
@@ -108,7 +128,7 @@ export const useAuthStore = create((set, get) => ({
     }
 
     try {
-      const data = await authApi.login({ ...payload, preferredRole });
+      const data = await authApi.login(payload);
       const profile = {
         ...get().profile,
         username: data.username,
@@ -198,6 +218,7 @@ export const useAuthStore = create((set, get) => ({
     localStorage.removeItem("token");
     localStorage.removeItem(AUTH_USER_KEY);
     sessionStorage.removeItem("mfaVerified");
+    saveAuthUser(null);
     set({ token: "", user: null, mfaVerified: false });
   },
 }));

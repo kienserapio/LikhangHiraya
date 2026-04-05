@@ -1,0 +1,413 @@
+.page {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #1c1b1b;
+  padding: 0 0 104px;
+}
+
+.topBar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandLogo {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid #d4c3ba;
+  background: #ffffff;
+}
+
+.brandName {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #553722;
+}
+
+.onlineStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 195, 186, 0.4);
+  background: #f7f2f2;
+  padding: 7px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #553722;
+}
+
+.onlineDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #82746d;
+}
+
+.onlineDotActive {
+  background: #523a00;
+  box-shadow: 0 0 0 6px rgba(82, 58, 0, 0.12);
+}
+
+.main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 18px;
+  display: grid;
+  gap: 22px;
+}
+
+.welcomeTitle {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.welcomeSub {
+  margin: 4px 0 0;
+  color: #50453e;
+  font-size: 0.94rem;
+}
+
+.earningsCard {
+  border: 0;
+  width: 100%;
+  text-align: left;
+  border-radius: 32px;
+  background: #6f4e37;
+  color: #ffffff;
+  padding: 24px;
+  box-shadow: 0 18px 34px rgba(111, 78, 55, 0.24);
+  cursor: pointer;
+}
+
+.earningsCard:active {
+  transform: scale(0.995);
+}
+
+.earningsLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.earningsLabel {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: rgba(238, 193, 164, 0.96);
+}
+
+.earningsValue {
+  margin: 10px 0 0;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.earningsSub {
+  margin: 6px 0 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.86rem;
+}
+
+.earningsMeta {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.earningsMetaBadge {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.earningsMetaValue {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.earningsMetaLabel {
+  margin: 2px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.metaTiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: min(520px, 100%);
+}
+
+.metaTile {
+  border-radius: 16px;
+  border: 1px solid #e6e1e1;
+  background: #f7f2f2;
+  padding: 12px;
+}
+
+.metaTileLabel {
+  margin: 0;
+  color: #50453e;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.metaTileValue {
+  margin: 8px 0 0;
+  color: #553722;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.logoutButton {
+  border: 1px solid #d4c3ba;
+  background: #ffffff;
+  color: #553722;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sectionHead h2 {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 800;
+}
+
+.sectionSub {
+  margin: 4px 0 0;
+  color: #50453e;
+  font-size: 0.88rem;
+}
+
+.cardGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.orderCard {
+  border: 1px solid #d4c3ba;
+  background: #ffffff;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.orderCardBody {
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.orderTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.orderCustomer {
+  margin: 0;
+  font-size: 0.69rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #50453e;
+}
+
+.orderTitle {
+  margin: 4px 0 0;
+  color: #553722;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.orderAmount {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #553722;
+}
+
+.orderMeta {
+  margin: 0;
+  color: #50453e;
+  font-size: 0.86rem;
+}
+
+.orderActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.orderActionDecline,
+.orderActionAccept,
+.orderActionPending {
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.orderActionDecline {
+  border: 1px solid #d4c3ba;
+  background: #ffffff;
+  color: #50453e;
+}
+
+.orderActionAccept,
+.orderActionPending {
+  border: 0;
+  background: #553722;
+  color: #ffffff;
+}
+
+.timerSection {
+  display: grid;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+
+.timerBase {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e6e1e1;
+}
+
+.timerFill {
+  height: 100%;
+  border-radius: 999px;
+  background: #523a00;
+  transition: width 0.3s linear;
+}
+
+.timerLabel {
+  margin: 0;
+  padding: 0;
+  color: #50453e;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.emptyCard {
+  border: 1px solid #d4c3ba;
+  border-radius: 18px;
+  background: #f7f2f2;
+  padding: 16px;
+  color: #50453e;
+  font-size: 0.9rem;
+}
+
+.pendingSection {
+  display: grid;
+  gap: 10px;
+}
+
+.pendingSection h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.pendingSection p {
+  margin: 0;
+  color: #50453e;
+  font-size: 0.84rem;
+}
+
+.loadingShell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 20px 18px;
+  color: #50453e;
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding-bottom: 94px;
+  }
+
+  .main {
+    padding-top: 18px;
+    gap: 16px;
+  }
+
+  .earningsCard {
+    border-radius: 24px;
+    padding: 16px;
+  }
+
+  .metaRow {
+    align-items: stretch;
+  }
+
+  .metaTiles {
+    grid-template-columns: 1fr;
+  }
+
+  .logoutButton {
+    width: 100%;
+  }
+
+  .orderActions {
+    grid-template-columns: 1fr;
+  }
+}

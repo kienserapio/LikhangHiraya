@@ -1,4 +1,3 @@
-import { localAuthApi } from "./localData";
 import { supabase } from "./supabaseClient";
 
 const configuredApiBaseUrl = (import.meta.env.VITE_API_URL || "").trim().replace(/\/$/, "");
@@ -133,6 +132,164 @@ function mapProductRow(row) {
   };
 }
 
+function normalizeRole(value) {
+  const role = String(value || "CUSTOMER").trim().toUpperCase();
+  if (role === "ADMIN" || role === "RIDER") {
+    return role;
+  }
+  return "CUSTOMER";
+}
+
+function normalizeAuthUserRow(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: String(row.id || ""),
+    username: String(row.username || ""),
+    fullName: row.full_name || row.username || "User",
+    email: row.email || "",
+    phone: row.phone || "",
+    address: row.address || "",
+    role: normalizeRole(row.role),
+    passwordHash: String(row.password_hash || ""),
+  };
+}
+
+function toAuthResponse(user) {
+  return {
+    token: `supabase-db-token-${user.username}-${Date.now()}`,
+    username: user.username,
+    fullName: user.fullName,
+    email: user.email,
+    phone: user.phone,
+    address: user.address,
+    role: user.role,
+  };
+}
+
+function isUniqueViolation(error) {
+  return String(error?.code || "") === "23505";
+}
+
+function duplicateFieldMessage(error) {
+  const message = String(error?.message || "").toLowerCase();
+  if (message.includes("users_email_key")) {
+    return "Email is already registered.";
+  }
+  if (message.includes("users_username_key")) {
+    return "Username is already taken.";
+  }
+  return "Account already exists.";
+}
+
+async function findUserByUsernameOrEmail(usernameOrEmail) {
+  const identity = String(usernameOrEmail || "").trim();
+  if (!identity) {
+    return null;
+  }
+
+  const baseSelect = "id, full_name, email, phone, username, password_hash, address, role";
+
+  const usernameRes = await supabase
+    .from("users")
+    .select(baseSelect)
+    .ilike("username", identity)
+    .limit(1);
+
+  if (usernameRes.error) {
+    throw new Error(`Unable to verify credentials: ${usernameRes.error.message}`);
+  }
+
+  if (Array.isArray(usernameRes.data) && usernameRes.data[0]) {
+    return normalizeAuthUserRow(usernameRes.data[0]);
+  }
+
+  const emailRes = await supabase
+    .from("users")
+    .select(baseSelect)
+    .ilike("email", identity)
+    .limit(1);
+
+  if (emailRes.error) {
+    throw new Error(`Unable to verify credentials: ${emailRes.error.message}`);
+  }
+
+  if (Array.isArray(emailRes.data) && emailRes.data[0]) {
+    return normalizeAuthUserRow(emailRes.data[0]);
+  }
+
+  return null;
+}
+
+async function createDatabaseAccount(payload, role) {
+  const normalizedRole = normalizeRole(role);
+  const fullName = String(payload.fullName || "").trim();
+  const email = String(payload.email || "").trim().toLowerCase();
+  const phone = String(payload.phone || "").trim();
+  const username = String(payload.username || "").trim();
+  const password = String(payload.password || "");
+  const address = String(payload.address || "").trim();
+
+  if (!fullName || !email || !phone || !username || !password || !address) {
+    throw new Error("Please complete all required fields.");
+  }
+
+  const row = {
+    full_name: fullName,
+    email,
+    phone,
+    username,
+    password_hash: password,
+    address,
+    role: normalizedRole,
+    vehicle_type: normalizedRole === "RIDER" ? (payload.vehicleType || null) : null,
+    plate_number: normalizedRole === "RIDER" ? (payload.plateNumber || null) : null,
+    drivers_license_number: normalizedRole === "RIDER" ? (payload.driversLicenseNumber || null) : null,
+    emergency_contact_name: normalizedRole === "RIDER" ? (payload.emergencyContactName || null) : null,
+    emergency_contact_phone: normalizedRole === "RIDER" ? (payload.emergencyContactPhone || null) : null,
+    gcash_number: normalizedRole === "RIDER" ? (payload.gcashNumber || null) : null,
+    working_shift: normalizedRole === "RIDER" ? (payload.workingShift || null) : null,
+    is_online: false,
+  };
+
+  const { data, error } = await supabase
+    .from("users")
+    .insert(row)
+    .select("id, full_name, email, phone, username, password_hash, address, role")
+    .single();
+
+  if (error) {
+    if (isUniqueViolation(error)) {
+      throw new Error(duplicateFieldMessage(error));
+    }
+    throw new Error(`Unable to create account in database: ${error.message}`);
+  }
+
+  return normalizeAuthUserRow(data);
+}
+
+async function loginAgainstDatabase(payload) {
+  const usernameOrEmail = String(payload?.usernameOrEmail || "").trim();
+  const password = String(payload?.password || "");
+
+  if (!usernameOrEmail || !password) {
+    throw new Error("Username/email and password are required.");
+  }
+
+  const user = await findUserByUsernameOrEmail(usernameOrEmail);
+  if (!user) {
+    throw new Error("Account not found. Please sign up first.");
+  }
+
+  if (!user.passwordHash || user.passwordHash !== password) {
+    throw new Error("Invalid username/email or password.");
+  }
+
+  return toAuthResponse(user);
+}
+
 async function listProductsFromSupabase() {
   const { data, error } = await supabase
     .from("products")
@@ -148,9 +305,15 @@ async function listProductsFromSupabase() {
 }
 
 export const authApi = {
-  login: (payload) => localAuthApi.login(payload),
-  register: (payload) => localAuthApi.register(payload),
-  registerRider: (payload) => localAuthApi.registerRider(payload),
+  login: (payload) => loginAgainstDatabase(payload),
+  register: async (payload) => {
+    await createDatabaseAccount(payload, "CUSTOMER");
+    return { success: true };
+  },
+  registerRider: async (payload) => {
+    await createDatabaseAccount(payload, "RIDER");
+    return { success: true };
+  },
 };
 
 export const productApi = {
@@ -162,6 +325,10 @@ export const orderApi = {
   listMine: (scope = "active") => apiRequest("/api/orders/mine", { query: { scope } }),
   clearMineActive: () => apiRequest("/api/orders/mine/active", { method: "DELETE" }),
   getById: (orderId) => apiRequest(`/api/orders/${encodeURIComponent(orderId)}`),
+  decline: (orderId) =>
+    apiRequest(`/api/orders/${encodeURIComponent(orderId)}/decline`, {
+      method: "PATCH",
+    }),
   updateStatus: (orderId, newStatus) =>
     apiRequest(`/api/orders/${encodeURIComponent(orderId)}/status`, {
       method: "PATCH",
@@ -173,7 +340,7 @@ export const riderApi = {
   dashboard: () => apiRequest("/api/rider/dashboard"),
   setAvailability: (payload) => apiRequest("/api/rider/availability", { method: "PATCH", body: payload }),
   acceptOrder: (orderId) => orderApi.updateStatus(orderId, "CONFIRMED"),
-  declineOrder: (orderId) => apiRequest(`/api/rider/orders/${encodeURIComponent(orderId)}/decline`, { method: "POST" }),
+  declineOrder: (orderId) => orderApi.decline(orderId),
   confirmPickup: (orderId) => orderApi.updateStatus(orderId, "PICKED_UP"),
   startTransit: (orderId) => orderApi.updateStatus(orderId, "IN_TRANSIT"),
   confirmArrival: (orderId) => orderApi.updateStatus(orderId, "ARRIVED"),

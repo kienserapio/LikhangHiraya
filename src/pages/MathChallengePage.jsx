@@ -16,10 +16,17 @@ export default function MathChallengePage() {
   const [error, setError] = useState("");
 
   const challenge = useMemo(() => {
-    const a = randomInt(1, 12);
-    const b = randomInt(1, 12);
+    let a = randomInt(1, 12);
+    let b = randomInt(1, 12);
     const operators = ["+", "-"];
     const op = operators[randomInt(0, operators.length - 1)];
+
+    if (op === "-" && b > a) {
+      const temp = a;
+      a = b;
+      b = temp;
+    }
+
     const expected = op === "+" ? a + b : a - b;
     return { a, b, op, expected };
   }, []);

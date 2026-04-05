@@ -73,6 +73,16 @@ export default function ProductDetailPage() {
     [toppingQty]
   );
 
+  const selectedToppings = useMemo(
+    () => Object.entries(toppingQty)
+      .filter(([, qty]) => Number(qty || 0) > 0)
+      .reduce((accumulator, [name, qty]) => {
+        accumulator[name] = Number(qty || 0);
+        return accumulator;
+      }, {}),
+    [toppingQty]
+  );
+
   const sizePrice = Number(product.pricePhp || 0) + Number(sizePriceModifiers[selectedSize] || 0);
   const total = sizePrice + toppingTotal;
 
@@ -165,7 +175,18 @@ export default function ProductDetailPage() {
             <button
               className="product-add-btn"
               onClick={() => {
-                addItem({ ...product, name: `${product.name} (${selectedSize})`, pricePhp: total, selectedSize }, 1, notes);
+                addItem(
+                  {
+                    ...product,
+                    name: `${product.name} (${selectedSize})`,
+                    pricePhp: total,
+                    selectedSize,
+                    toppings: selectedToppings,
+                    toppingTotal,
+                  },
+                  1,
+                  notes
+                );
                 navigate("/cart");
               }}
             >

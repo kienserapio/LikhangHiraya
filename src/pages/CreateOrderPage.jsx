@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCartStore } from "../store/cartStore";
 import { useAuthStore } from "../store/authStore";
 import { createActiveOrder } from "../services/activeOrders";
+import { createOnlinePaymentDraft, saveOnlinePaymentDraft } from "../services/paymentSimulation";
 import "./CreateOrderPage.css";
 
 function toPeso(value) {
@@ -21,6 +22,7 @@ export default function CreateOrderPage() {
   const subtotal = useCartStore((state) => state.subtotal());
   const total = useCartStore((state) => state.total());
   const profile = useAuthStore((state) => state.profile);
+  const isOnlinePayment = paymentMethod === "ONLINE_PAYMENT";
   const canCreateOrder = items.length > 0 && paymentMethod !== "" && !isSubmitting;
 
   async function handleCreateOrder() {
@@ -31,10 +33,25 @@ export default function CreateOrderPage() {
     setSubmitError("");
     setIsSubmitting(true);
     try {
+      if (isOnlinePayment) {
+        const onlinePaymentDraft = createOnlinePaymentDraft({
+          profile,
+          items,
+          subtotal,
+          total,
+          paymentMethod,
+        });
+
+        saveOnlinePaymentDraft(onlinePaymentDraft);
+        navigate("/payment/gcash/login");
+        return;
+      }
+
       const created = await createActiveOrder({
         profile,
         items,
         paymentMethod,
+        paymentReferenceNumber: "",
         subtotal,
         total,
       });
@@ -61,7 +78,7 @@ export default function CreateOrderPage() {
         <div className="order-list">
           {items.length === 0 ? <p>Your cart is empty.</p> : null}
           {items.map((item) => (
-            <div className="order-card" key={item.id} data-purpose="order-item">
+            <div className="order-card" key={item.cartKey || item.id} data-purpose="order-item">
               <div className="order-thumb"><img alt={item.name} src={item.imageUrl || ""} /></div>
               <div className="order-body">
                 <div className="order-head">
@@ -70,9 +87,9 @@ export default function CreateOrderPage() {
                 </div>
                 <p className="price">{toPeso(item.pricePhp)}</p>
                 <div className="qty">
-                  <button className="qty-btn" onClick={() => decrement(item.id)} aria-label={`Decrease ${item.name}`}>-</button>
+                  <button className="qty-btn" onClick={() => decrement(item.cartKey || item.id)} aria-label={`Decrease ${item.name}`}>-</button>
                   <span className="qty-value">{item.quantity}</span>
-                  <button className="qty-btn" onClick={() => increment(item.id)} aria-label={`Increase ${item.name}`}>+</button>
+                  <button className="qty-btn" onClick={() => increment(item.cartKey || item.id)} aria-label={`Increase ${item.name}`}>+</button>
                 </div>
               </div>
             </div>
@@ -94,10 +111,16 @@ export default function CreateOrderPage() {
               aria-label="Select payment method"
             >
               <option value="" disabled>Select payment method</option>
-              <option value="ONLINE_PAYMENT">Online Payment</option>
-              <option value="CASH_ON_DELIVERY">Cash on Delivery only</option>
+              <option value="ONLINE_PAYMENT">Online Payment (GCash)</option>
+              <option value="CASH_ON_DELIVERY">Cash on Delivery</option>
             </select>
           </div>
+
+          {isOnlinePayment ? (
+            <p className="gcash-flow-note" data-purpose="gcash-flow-note">
+              You will complete payment in GCash simulation before your order is submitted.
+            </p>
+          ) : null}
         </div>
 
         <div className="total-wrap"><p>Total: {toPeso(total)}</p></div>
@@ -110,7 +133,7 @@ export default function CreateOrderPage() {
         disabled={!canCreateOrder}
         aria-disabled={!canCreateOrder}
       >
-        <span>{isSubmitting ? "Creating Order..." : "Create Order"}</span>
+        <span>{isSubmitting ? (isOnlinePayment ? "Preparing Payment..." : "Creating Order...") : (isOnlinePayment ? "Proceed to GCash" : "Create Order")}</span>
         <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
       </button>
     </div>

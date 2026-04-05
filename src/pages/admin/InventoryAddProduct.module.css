@@ -1,0 +1,140 @@
+.addPage {
+  display: grid;
+  gap: 16px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pageTitle {
+  margin: 0;
+  color: #553722;
+  font-size: clamp(1.45rem, 2.7vw, 2rem);
+  font-weight: 800;
+}
+
+.pageSub {
+  margin: 6px 0 0;
+  color: #7f736c;
+  font-size: 0.9rem;
+}
+
+.success {
+  margin: 0;
+  color: #14532d;
+  font-weight: 700;
+}
+
+.formPanel {
+  background: #ffffff;
+  border: 1px solid #eadfd2;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field label {
+  color: #553722;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.field input,
+.field select,
+.field textarea {
+  border: 1px solid #d9c8bc;
+  border-radius: 10px;
+  background: #ffffff;
+  font: inherit;
+  padding: 10px;
+}
+
+.field textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.fieldHint {
+  margin: 0;
+  color: #8a7d75;
+  font-size: 0.76rem;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.previewPane {
+  border: 1px dashed #cfb8a7;
+  border-radius: 14px;
+  min-height: 190px;
+  overflow: hidden;
+  background: #faf6f2;
+}
+
+.previewImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-height: 300px;
+}
+
+.previewFallback {
+  width: 100%;
+  min-height: 190px;
+  display: grid;
+  place-items: center;
+  color: #8a7d75;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.primaryButton {
+  border: 0;
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: linear-gradient(145deg, #553722, #6f4e37);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 20px -14px rgba(85, 55, 34, 0.7);
+}
+
+.primaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+@media (max-width: 860px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

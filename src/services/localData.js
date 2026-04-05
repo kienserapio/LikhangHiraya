@@ -129,10 +129,6 @@ function currentUserSnapshot() {
 
 function ensureSeedUsers() {
   const users = loadUsers();
-  if (users.length > 0) {
-    return;
-  }
-
   const seeded = [
     {
       id: makeId("usr"),
@@ -163,9 +159,59 @@ function ensureSeedUsers() {
       workingShift: "MORNING",
       createdAt: nowIso(),
     },
+    {
+      id: makeId("usr"),
+      fullName: "Sample Admin",
+      email: "admin@likhanghiraya.local",
+      phone: "09170000000",
+      username: "admin",
+      password: "Admin123!",
+      address: "Likhang Hiraya HQ, Manila",
+      role: "ADMIN",
+      createdAt: nowIso(),
+    },
   ];
 
-  saveUsers(seeded);
+  const nextUsers = [...users];
+  let changed = false;
+
+  for (const seedUser of seeded) {
+    const existingIndex = nextUsers.findIndex((item) => {
+      const sameUsername = String(item.username || "").toLowerCase() === String(seedUser.username || "").toLowerCase();
+      const sameEmail = String(item.email || "").toLowerCase() === String(seedUser.email || "").toLowerCase();
+      return sameUsername || sameEmail;
+    });
+
+    if (existingIndex === -1) {
+      nextUsers.push(seedUser);
+      changed = true;
+      continue;
+    }
+
+    // Ensure seeded system accounts always have role and login credentials.
+    const existing = nextUsers[existingIndex];
+    const updates = {};
+    const expectedRole = String(seedUser.role || "CUSTOMER").toUpperCase();
+    const currentRole = String(existing.role || "CUSTOMER").toUpperCase();
+
+    if (currentRole !== expectedRole) {
+      updates.role = expectedRole;
+    }
+
+    const hasPassword = String(existing.password || existing.password_hash || "").trim().length > 0;
+    if (!hasPassword) {
+      updates.password = seedUser.password;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      nextUsers[existingIndex] = { ...existing, ...updates };
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    saveUsers(nextUsers);
+  }
 }
 
 function ensureSeedOrders() {
@@ -475,38 +521,29 @@ export const localAuthApi = {
   async login(payload) {
     ensureLocalSeedData();
 
-    const preferredRole = payload.preferredRole || "CUSTOMER";
     const usernameOrEmail = (payload.usernameOrEmail || "guest").trim();
+    const password = String(payload.password || "");
     const users = loadUsers();
 
-    let user = users.find(
+    const user = users.find(
       (item) =>
-        item.role === preferredRole &&
-        (item.username.toLowerCase() === usernameOrEmail.toLowerCase() ||
-          item.email.toLowerCase() === usernameOrEmail.toLowerCase())
+        (String(item.username || "").toLowerCase() === usernameOrEmail.toLowerCase() ||
+          String(item.email || "").toLowerCase() === usernameOrEmail.toLowerCase())
     );
 
-    // In temporary frontend-only mode, create a lightweight account when not found.
     if (!user) {
-      user = {
-        id: makeId("usr"),
-        fullName: preferredRole === "RIDER" ? "New Rider" : preferredRole === "ADMIN" ? "New Admin" : "New Customer",
-        email: `${usernameOrEmail || "user"}@local.dev`,
-        phone: "",
-        username: usernameOrEmail || `${preferredRole.toLowerCase()}-${Math.random().toString(36).slice(2, 6)}`,
-        password: payload.password || "",
-        address: "Manila, Globe St. ABC 123",
-        role: preferredRole,
-        workingShift: preferredRole === "RIDER" ? "MORNING" : undefined,
-        createdAt: nowIso(),
-      };
-      saveUsers([...users, user]);
+      throw new Error("Account not found. Please sign up first.");
+    }
+
+    const storedPassword = String(user.password || user.password_hash || "");
+    if (!storedPassword || storedPassword !== password) {
+      throw new Error("Invalid username/email or password.");
     }
 
     return {
       token: `local-token-${user.username}-${Date.now()}`,
       username: user.username,
-      role: user.role,
+      role: String(user.role || "CUSTOMER").toUpperCase(),
       fullName: user.fullName,
       email: user.email,
       phone: user.phone,

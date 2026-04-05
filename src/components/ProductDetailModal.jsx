@@ -27,6 +27,16 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
     [toppingQty]
   );
 
+  const selectedToppings = useMemo(
+    () => Object.entries(toppingQty)
+      .filter(([, qty]) => Number(qty || 0) > 0)
+      .reduce((accumulator, [name, qty]) => {
+        accumulator[name] = Number(qty || 0);
+        return accumulator;
+      }, {}),
+    [toppingQty]
+  );
+
   if (!isOpen || !product) {
     return null;
   }
@@ -127,7 +137,14 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
                   className="product-add-btn"
                   type="button"
                   onClick={() => {
-                    addItem({ ...product, name: `${product.name} (${selectedSize})`, pricePhp: total, selectedSize }, 1);
+                    addItem({
+                      ...product,
+                      name: `${product.name} (${selectedSize})`,
+                      pricePhp: total,
+                      selectedSize,
+                      toppings: selectedToppings,
+                      toppingTotal,
+                    }, 1);
                     onClose();
                   }}
                 >

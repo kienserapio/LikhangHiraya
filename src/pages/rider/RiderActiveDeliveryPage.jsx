@@ -5,8 +5,11 @@ import {
   confirmArrival,
   confirmPickup,
   fetchRiderDashboard,
+  startTransit,
   subscribeToRiderOrders,
 } from "../../services/riderApi";
+import RiderBottomNav from "../../components/rider/RiderBottomNav";
+import RiderPageLoader from "../../components/rider/RiderPageLoader";
 import styles from "./RiderPages.module.css";
 
 const steps = ["ASSIGNED", "PICKUP", "TRANSIT", "DELIVERED"];
@@ -31,7 +34,7 @@ function normalizeRiderItem(item) {
 }
 
 function activeStepFromStatus(status) {
-  if (status === "RIDER_ASSIGNED") {
+  if (status === "CONFIRMED" || status === "PREPARING" || status === "RIDER_ASSIGNED") {
     return 0;
   }
   if (status === "PICKED_UP") {
@@ -92,7 +95,11 @@ export default function RiderActiveDeliveryPage() {
   }, [activeOrder?.pickedUpAt]);
 
   if (isLoading) {
-    return <div className={styles.page}><div className={styles.shell}>Loading active delivery...</div></div>;
+    return (
+      <div className={styles.page}>
+        <RiderPageLoader />
+      </div>
+    );
   }
 
   if (!activeOrder) {
@@ -107,6 +114,7 @@ export default function RiderActiveDeliveryPage() {
             </div>
           </section>
         </div>
+        <RiderBottomNav />
       </div>
     );
   }
@@ -170,14 +178,21 @@ export default function RiderActiveDeliveryPage() {
           {etaLabel ? <p className={styles.subtitle} style={{ marginTop: 12 }}>{etaLabel}</p> : null}
 
           <div className={styles.actions}>
-            {activeOrder.status === "RIDER_ASSIGNED" ? (
+            {activeOrder.status === "CONFIRMED" || activeOrder.status === "PREPARING" || activeOrder.status === "RIDER_ASSIGNED" ? (
               <>
                 <button className={styles.secondary} onClick={() => window.open(mapsLink("Likhang Hiraya Cafe, Manila"), "_blank")}>Get Directions to Cafe</button>
                 <button className={styles.primary} onClick={() => confirmPickup(activeOrder.orderId).then(refresh)}>Confirm Pickup</button>
               </>
             ) : null}
 
-            {activeOrder.status === "PICKED_UP" || activeOrder.status === "IN_TRANSIT" ? (
+            {activeOrder.status === "PICKED_UP" ? (
+              <>
+                <button className={styles.secondary} onClick={() => window.open(mapsLink(activeOrder.customerAddress), "_blank")}>Navigate to Customer</button>
+                <button className={styles.primary} onClick={() => startTransit(activeOrder.orderId).then(refresh)}>Start Transit</button>
+              </>
+            ) : null}
+
+            {activeOrder.status === "IN_TRANSIT" ? (
               <>
                 <button className={styles.secondary} onClick={() => window.open(mapsLink(activeOrder.customerAddress), "_blank")}>Navigate to Customer</button>
                 <button className={styles.primary} onClick={() => confirmArrival(activeOrder.orderId).then(refresh)}>Confirm Arrival</button>
@@ -189,9 +204,11 @@ export default function RiderActiveDeliveryPage() {
                 <button className={styles.outline}>Total to Collect: {toPeso(activeOrder.total)}</button>
                 <button
                   className={styles.primary}
-                  onClick={() => {
-                    completeRiderDelivery(activeOrder.orderId).then(() => {
-                      navigate("/rider/dashboard");
+                  onClick={async () => {
+                    const deliveredOrder = await completeRiderDelivery(activeOrder.orderId);
+                    navigate(`/rider/delivery-success/${activeOrder.orderId}`, {
+                      state: { deliveredOrder },
+                      replace: true,
                     });
                   }}
                 >
@@ -202,6 +219,7 @@ export default function RiderActiveDeliveryPage() {
           </div>
         </section>
       </div>
+      <RiderBottomNav />
     </div>
   );
 }

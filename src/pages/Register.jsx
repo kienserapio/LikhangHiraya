@@ -20,7 +20,6 @@ const registerSchema = z
       ),
     confirmPassword: z.string().min(8),
     address: z.string().min(8, "Address is required"),
-    accountType: z.enum(["CUSTOMER", "RIDER"]),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -40,7 +39,6 @@ export default function Register() {
     password: "",
     confirmPassword: "",
     address: "",
-    accountType: "CUSTOMER",
   });
   const [errors, setErrors] = useState({});
 
@@ -53,11 +51,6 @@ export default function Register() {
     const parsed = registerSchema.safeParse(form);
     if (!parsed.success) {
       setErrors(parsed.error.flatten().fieldErrors);
-      return;
-    }
-
-    if (form.accountType === "RIDER") {
-      navigate("/rider-signup");
       return;
     }
 
@@ -77,7 +70,6 @@ export default function Register() {
         username: form.username,
         password: form.password,
         address: form.address,
-        accountType: form.accountType,
       });
       navigate("/login");
     } catch (error) {
@@ -95,38 +87,38 @@ export default function Register() {
 
         <form className={styles.form} onSubmit={handleSubmit}>
           <label className={styles.field}>
-            <span>Full Name</span>
+            <span>Full Name <span className={styles["required-star"]}>*</span></span>
             <input value={form.fullName} onChange={(event) => handleChange("fullName", event.target.value)} />
             {errors.fullName ? <small>{errors.fullName[0]}</small> : null}
           </label>
 
           <label className={styles.field}>
-            <span>Email</span>
+            <span>Email <span className={styles["required-star"]}>*</span></span>
             <input value={form.email} onChange={(event) => handleChange("email", event.target.value)} />
             {errors.email ? <small>{errors.email[0]}</small> : null}
           </label>
 
           <label className={styles.field}>
-            <span>Phone</span>
+            <span>Phone <span className={styles["required-star"]}>*</span></span>
             <input value={form.phone} placeholder="09XXXXXXXXX" onChange={(event) => handleChange("phone", event.target.value)} />
             {errors.phone ? <small>{errors.phone[0]}</small> : null}
           </label>
 
           <label className={styles.field}>
-            <span>Username</span>
+            <span>Username <span className={styles["required-star"]}>*</span></span>
             <input value={form.username} onChange={(event) => handleChange("username", event.target.value)} />
             {errors.username ? <small>{errors.username[0]}</small> : null}
           </label>
 
           <label className={styles.field}>
-            <span>Password</span>
+            <span>Password <span className={styles["required-star"]}>*</span></span>
             <input type="password" value={form.password} onChange={(event) => handleChange("password", event.target.value)} />
             <p className={styles.help}>8+ characters with uppercase, lowercase, number, and special character.</p>
             {errors.password ? <small>{errors.password[0]}</small> : null}
           </label>
 
           <label className={styles.field}>
-            <span>Confirm Password</span>
+            <span>Confirm Password <span className={styles["required-star"]}>*</span></span>
             <input
               type="password"
               value={form.confirmPassword}
@@ -136,18 +128,9 @@ export default function Register() {
           </label>
 
           <label className={styles.field}>
-            <span>Delivery Address</span>
+            <span>Delivery Address <span className={styles["required-star"]}>*</span></span>
             <input value={form.address} onChange={(event) => handleChange("address", event.target.value)} />
             {errors.address ? <small>{errors.address[0]}</small> : null}
-          </label>
-
-          <label className={styles.field}>
-            <span>Sign up as</span>
-            <select value={form.accountType} onChange={(event) => handleChange("accountType", event.target.value)}>
-              <option value="CUSTOMER">Customer</option>
-              <option value="RIDER">Delivery Rider</option>
-            </select>
-            {errors.accountType ? <small>{errors.accountType[0]}</small> : null}
           </label>
 
           <button type="submit" className={styles.submit}>Sign up</button>

@@ -1,0 +1,379 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap");
+
+.customer-delivery-page {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #1c1b1b;
+  font-family: "Inter", sans-serif;
+}
+
+.customer-delivery-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(212, 195, 186, 0.36);
+  width: min(100%, 760px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.customer-delivery-topbar h1 {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 1.16rem;
+  font-weight: 800;
+  color: #553722;
+}
+
+.customer-delivery-back,
+.customer-delivery-spacer {
+  width: 34px;
+  height: 34px;
+}
+
+.customer-delivery-back {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #553722;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.customer-delivery-back svg {
+  width: 22px;
+  height: 22px;
+}
+
+.customer-delivery-main {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 92px 16px 130px;
+  display: grid;
+  gap: 14px;
+}
+
+.customer-delivery-hero {
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin: 8px 0 2px;
+}
+
+.customer-delivery-icon-wrap {
+  width: 98px;
+  height: 98px;
+  border-radius: 999px;
+  background: #f7f2f2;
+  display: grid;
+  place-items: center;
+}
+
+.customer-delivery-icon-core {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #553722 0%, #6f4e37 100%);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 24px -14px rgba(85, 55, 34, 0.82);
+}
+
+.customer-delivery-icon-core svg {
+  width: 36px;
+  height: 36px;
+}
+
+.customer-delivery-hero h2 {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 800;
+  color: #553722;
+}
+
+.customer-delivery-hero p {
+  margin: 0;
+  color: #50453e;
+  font-size: 1rem;
+}
+
+.customer-delivery-card,
+.customer-delivery-rider-card {
+  border-radius: 22px;
+  border: 1px solid rgba(212, 195, 186, 0.46);
+  background: #ffffff;
+}
+
+.customer-delivery-card {
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.customer-delivery-card::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  bottom: -34px;
+  width: 130px;
+  height: 130px;
+  border-radius: 999px;
+  background: rgba(85, 55, 34, 0.07);
+  filter: blur(10px);
+}
+
+.customer-delivery-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.customer-delivery-meta-row span {
+  display: block;
+  color: rgba(85, 55, 34, 0.62);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+
+.customer-delivery-meta-row p {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  color: #1c1b1b;
+  font-size: 1.03rem;
+  font-weight: 800;
+}
+
+.customer-delivery-meta-right {
+  text-align: right;
+}
+
+.customer-delivery-items {
+  display: grid;
+  gap: 8px;
+}
+
+.customer-delivery-items h3 {
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(212, 195, 186, 0.35);
+  color: #50453e;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.customer-delivery-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.customer-delivery-item-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #f1edec;
+  color: #553722;
+  display: grid;
+  place-items: center;
+}
+
+.customer-delivery-item-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.customer-delivery-item-copy {
+  flex: 1;
+}
+
+.customer-delivery-item-copy p {
+  margin: 0;
+  color: #1c1b1b;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.customer-delivery-item-row strong {
+  font-family: "Manrope", sans-serif;
+  color: #553722;
+  font-size: 0.92rem;
+}
+
+.customer-delivery-totals {
+  display: grid;
+  gap: 5px;
+  border-top: 1px solid rgba(212, 195, 186, 0.36);
+  padding-top: 10px;
+}
+
+.customer-delivery-totals div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #50453e;
+  font-size: 0.88rem;
+}
+
+.customer-delivery-totals strong {
+  color: #1c1b1b;
+  font-weight: 800;
+}
+
+.customer-delivery-total-row {
+  margin-top: 4px;
+}
+
+.customer-delivery-total-row span,
+.customer-delivery-total-row strong {
+  color: #553722;
+  font-family: "Manrope", sans-serif;
+  font-size: 1rem;
+}
+
+.customer-delivery-summary-count {
+  margin: 0;
+  color: #50453e;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.customer-delivery-rider-card {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.customer-delivery-rider-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #f1edec, #ece7e7);
+}
+
+.customer-delivery-rider-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.customer-delivery-rider-copy span {
+  color: rgba(85, 55, 34, 0.65);
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.customer-delivery-rider-copy p {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1c1b1b;
+}
+
+.customer-delivery-rider-copy small {
+  color: #50453e;
+  font-size: 0.8rem;
+}
+
+.customer-delivery-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 45;
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 14px 16px 20px;
+  background: linear-gradient(to top, #ffffff 65%, rgba(255, 255, 255, 0));
+}
+
+.customer-delivery-footer button {
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  background: #1c1b1b;
+  color: #ffffff;
+  min-height: 56px;
+  font-family: "Manrope", sans-serif;
+  font-size: 1.02rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.customer-delivery-loading,
+.customer-delivery-error-card {
+  width: min(100%, 560px);
+  margin: 0 auto;
+}
+
+.customer-delivery-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: #553722;
+  font-family: "Manrope", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.customer-delivery-error-card {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: 18px;
+  text-align: center;
+}
+
+.customer-delivery-error-card h1 {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  color: #553722;
+}
+
+.customer-delivery-error-card p {
+  margin: 0;
+  color: #50453e;
+}
+
+.customer-delivery-error-card button {
+  border: 0;
+  border-radius: 999px;
+  min-height: 48px;
+  background: #1c1b1b;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .customer-delivery-meta-row p {
+    font-size: 0.92rem;
+  }
+
+  .customer-delivery-item-copy p {
+    font-size: 0.85rem;
+  }
+}

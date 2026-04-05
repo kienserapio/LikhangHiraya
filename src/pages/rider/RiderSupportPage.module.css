@@ -1,0 +1,107 @@
+.page {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #1c1b1b;
+  padding-bottom: 112px;
+}
+
+.topBar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 24px -12px rgba(28, 27, 27, 0.08);
+}
+
+.backButton {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #553722;
+  cursor: pointer;
+}
+
+.backButton svg {
+  width: 100%;
+  height: 100%;
+}
+
+.topTitle {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: #553722;
+}
+
+.main {
+  width: min(100%, 860px);
+  margin: 0 auto;
+  padding: 18px 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.card {
+  border-radius: 16px;
+  border: 1px solid #ece7e7;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.card h2,
+.card h3 {
+  margin: 0;
+  color: #553722;
+  font-weight: 800;
+}
+
+.card p {
+  margin: 8px 0 0;
+  color: #50453e;
+  font-size: 0.9rem;
+}
+
+.actionCard {
+  display: block;
+  border-radius: 16px;
+  border: 1px solid #d4c3ba;
+  background: #f7f2f2;
+  padding: 16px;
+  text-decoration: none;
+}
+
+.actionCard h3 {
+  margin: 0;
+  color: #553722;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.actionCard p {
+  margin: 6px 0 0;
+  color: #50453e;
+  font-size: 0.88rem;
+}
+
+.tipList {
+  margin: 10px 0 0;
+  padding-left: 16px;
+  color: #50453e;
+  font-size: 0.88rem;
+  display: grid;
+  gap: 6px;
+}
+
+@media (max-width: 540px) {
+  .page {
+    padding-bottom: 98px;
+  }
+}

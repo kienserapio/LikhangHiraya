@@ -1,0 +1,321 @@
+.dashboardPage {
+  display: grid;
+  gap: 18px;
+}
+
+.overviewHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.overviewText {
+  display: grid;
+  gap: 6px;
+}
+
+.overviewTitle {
+  margin: 0;
+  color: #553722;
+  font-size: clamp(1.4rem, 2.8vw, 2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+
+.overviewSub {
+  margin: 0;
+  color: #7f736c;
+  font-size: 0.92rem;
+}
+
+.overviewActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.dateChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1edec;
+  border: 1px solid #e3d6cf;
+  border-radius: 12px;
+  color: #553722;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 8px 11px;
+}
+
+.dateIcon {
+  font-size: 0.95rem;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.kpiCard {
+  background: #ffffff;
+  border: 1px solid #eadfd2;
+  border-radius: 16px;
+  padding: 15px;
+  display: grid;
+  gap: 8px;
+  box-shadow: 0 10px 24px -22px rgba(28, 27, 27, 0.35);
+}
+
+.kpiIconBubble {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: #f8f2ed;
+  border: 1px solid #e9ded6;
+  color: #5d4201;
+  font-size: 0.95rem;
+}
+
+.kpiLabel {
+  margin: 0;
+  color: #7f736c;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kpiValue {
+  margin: 0;
+  color: #553722;
+  font-size: clamp(1.3rem, 2.7vw, 1.9rem);
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.mainStack {
+  display: grid;
+  gap: 16px;
+}
+
+.chartPanel,
+.tablePanel {
+  background: #ffffff;
+  border: 1px solid #eadfd2;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 12px 24px -20px rgba(28, 27, 27, 0.32);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.panelTitle {
+  margin: 0;
+  color: #553722;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.panelSub {
+  margin: 4px 0 0;
+  color: #82746d;
+  font-size: 0.82rem;
+}
+
+.segmentedControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1edec;
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid #eadfd2;
+}
+
+.segmentButton {
+  border: 0;
+  background: transparent;
+  color: #7f736c;
+  font-weight: 700;
+  font-size: 0.74rem;
+  border-radius: 9px;
+  padding: 7px 11px;
+  cursor: pointer;
+}
+
+.segmentButton:hover {
+  color: #553722;
+}
+
+.segmentButtonActive {
+  background: linear-gradient(140deg, #553722, #6f4e37);
+  color: #ffffff;
+  box-shadow: 0 8px 14px -10px rgba(85, 55, 34, 0.8);
+}
+
+.chartBox {
+  width: 100%;
+  height: 300px;
+}
+
+.viewAllButton {
+  border: 1px solid #d4c3ba;
+  background: #ffffff;
+  color: #553722;
+  border-radius: 10px;
+  padding: 8px 11px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.viewAllButton:hover {
+  background: #f8f4f1;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.recentOrdersTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+.recentOrdersTable thead {
+  background: #faf6f3;
+}
+
+.recentOrdersTable th,
+.recentOrdersTable td {
+  border-bottom: 1px solid #efe6df;
+  text-align: left;
+  padding: 11px 10px;
+  font-size: 0.88rem;
+}
+
+.recentOrdersTable th {
+  color: #82746d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.recentOrdersTable tbody tr:hover {
+  background: #fcfaf8;
+}
+
+.alignRight {
+  text-align: right !important;
+}
+
+.emptyState {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.88rem;
+}
+
+.systemStatus {
+  border: 1px solid #dcc8ba;
+  background: #fffaf4;
+  border-radius: 14px;
+  padding: 11px 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.systemStatusLabel {
+  margin: 0;
+  color: #6d5010;
+  font-size: 0.69rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+}
+
+.systemStatusRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #553722;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.systemDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
+}
+
+.systemDotWarn {
+  background: #f59e0b;
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.15);
+}
+
+@media (max-width: 1080px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .overviewHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .panelHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .segmentedControl {
+    width: 100%;
+  }
+
+  .segmentButton {
+    flex: 1;
+  }
+
+  .chartBox {
+    height: 260px;
+  }
+}
+
+@media (max-width: 640px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .chartPanel,
+  .tablePanel {
+    border-radius: 14px;
+    padding: 12px;
+  }
+
+  .systemStatus {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

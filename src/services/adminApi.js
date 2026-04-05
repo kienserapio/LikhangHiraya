@@ -1,6 +1,14 @@
 import { supabase } from "./supabaseClient";
 
-const DEFAULT_PRODUCT_BUCKET = import.meta.env.VITE_SUPABASE_PRODUCT_BUCKET || "product-images";
+const CONFIGURED_PRODUCT_BUCKET = String(import.meta.env.VITE_SUPABASE_PRODUCT_BUCKET || "").trim();
+const DEFAULT_PRODUCT_BUCKET = "assets";
+const PRODUCT_BUCKET_CANDIDATES = Array.from(
+  new Set([
+    CONFIGURED_PRODUCT_BUCKET,
+    DEFAULT_PRODUCT_BUCKET,
+    "product-images",
+  ].filter(Boolean))
+);
 
 function toNumber(value) {
   return Number(value || 0);
@@ -11,6 +19,20 @@ function toDateKey(value) {
     return "";
   }
   return new Date(value).toISOString().slice(0, 10);
+}
+
+function toMonthKey(value) {
+  if (!value) {
+    return "";
+  }
+  return new Date(value).toISOString().slice(0, 7);
+}
+
+function toYearKey(value) {
+  if (!value) {
+    return "";
+  }
+  return String(new Date(value).getUTCFullYear());
 }
 
 function startOfTodayIso() {
@@ -36,6 +58,66 @@ function buildLastSevenDays() {
   return days;
 }
 
+function normalizeDashboardRange(range) {
+  const normalized = String(range || "").trim().toUpperCase();
+  if (normalized === "MONTH" || normalized === "YEAR") {
+    return normalized;
+  }
+  return "WEEK";
+}
+
+function buildRevenueBuckets(range) {
+  const normalizedRange = normalizeDashboardRange(range);
+
+  if (normalizedRange === "MONTH") {
+    const now = new Date();
+    const buckets = [];
+
+    for (let offset = 11; offset >= 0; offset -= 1) {
+      const current = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - offset, 1));
+      buckets.push({
+        key: current.toISOString().slice(0, 7),
+        label: current.toLocaleDateString("en-PH", { month: "short", year: "numeric" }),
+      });
+    }
+
+    return {
+      range: normalizedRange,
+      sinceIso: `${buckets[0].key}-01T00:00:00.000Z`,
+      buckets,
+      keySelector: (createdAt) => toMonthKey(createdAt),
+    };
+  }
+
+  if (normalizedRange === "YEAR") {
+    const now = new Date();
+    const currentYear = now.getUTCFullYear();
+    const buckets = [];
+
+    for (let year = currentYear - 4; year <= currentYear; year += 1) {
+      buckets.push({
+        key: String(year),
+        label: String(year),
+      });
+    }
+
+    return {
+      range: normalizedRange,
+      sinceIso: `${buckets[0].key}-01-01T00:00:00.000Z`,
+      buckets,
+      keySelector: (createdAt) => toYearKey(createdAt),
+    };
+  }
+
+  const days = buildLastSevenDays();
+  return {
+    range: "WEEK",
+    sinceIso: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    buckets: days,
+    keySelector: (createdAt) => toDateKey(createdAt),
+  };
+}
+
 function mapProductRow(row) {
   const stockQuantity = toNumber(row.stock);
   return {
@@ -57,17 +139,42 @@ function assertNoError(error, contextMessage) {
   throw new Error(`${contextMessage}: ${error.message}`);
 }
 
-export async function fetchAdminDashboardSnapshot() {
-  const todayIso = startOfTodayIso();
+function isBucketNotFoundError(error) {
+  return String(error?.message || "").toLowerCase().includes("bucket not found");
+}
 
-  const [todayOrdersCountRes, todayRevenueRes, activeRidersCountRes, pendingOrdersCountRes, recentOrdersRes, weekOrdersRes] =
+function isStorageRlsError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return message.includes("row-level security") || message.includes("violates row-level security policy");
+}
+
+async function getProductById(productId, contextMessage) {
+  const productRes = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
+  assertNoError(productRes.error, contextMessage);
+
+  if (!productRes.data) {
+    throw new Error(`${contextMessage}: Product not found.`);
+  }
+
+  return mapProductRow(productRes.data);
+}
+
+export async function fetchAdminDashboardSnapshot(range = "WEEK") {
+  const todayIso = startOfTodayIso();
+  const revenueConfig = buildRevenueBuckets(range);
+
+  const [todayOrdersCountRes, todayRevenueRes, activeRidersCountRes, pendingOrdersCountRes, recentOrdersRes, revenueOrdersRes] =
     await Promise.all([
       supabase.from("orders").select("id", { head: true, count: "exact" }).gte("created_at", todayIso),
       supabase.from("orders").select("total").gte("created_at", todayIso).eq("status", "DELIVERED"),
       supabase.from("users").select("id", { head: true, count: "exact" }).eq("role", "RIDER").eq("is_online", true),
       supabase.from("orders").select("id", { head: true, count: "exact" }).eq("status", "PENDING"),
       supabase.from("orders").select("id, user_id, status, total, created_at").order("created_at", { ascending: false }).limit(10),
-      supabase.from("orders").select("created_at, total").gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+      supabase
+        .from("orders")
+        .select("created_at, total")
+        .eq("status", "DELIVERED")
+        .gte("created_at", revenueConfig.sinceIso),
     ]);
 
   assertNoError(todayOrdersCountRes.error, "Unable to load today's order count");
@@ -75,7 +182,7 @@ export async function fetchAdminDashboardSnapshot() {
   assertNoError(activeRidersCountRes.error, "Unable to load active riders");
   assertNoError(pendingOrdersCountRes.error, "Unable to load pending orders");
   assertNoError(recentOrdersRes.error, "Unable to load recent orders");
-  assertNoError(weekOrdersRes.error, "Unable to load weekly revenue trend");
+  assertNoError(revenueOrdersRes.error, "Unable to load revenue trend");
 
   const recentOrders = recentOrdersRes.data || [];
   const customerIds = Array.from(new Set(recentOrders.map((order) => order.user_id).filter(Boolean)));
@@ -87,18 +194,18 @@ export async function fetchAdminDashboardSnapshot() {
     customerMap = new Map((usersRes.data || []).map((user) => [String(user.id), user]));
   }
 
-  const revenueDays = buildLastSevenDays();
-  const revenueByDay = new Map(revenueDays.map((day) => [day.key, 0]));
+  const revenueByBucket = new Map(revenueConfig.buckets.map((bucket) => [bucket.key, 0]));
 
-  for (const order of weekOrdersRes.data || []) {
-    const key = toDateKey(order.created_at);
-    if (!revenueByDay.has(key)) {
+  for (const order of revenueOrdersRes.data || []) {
+    const key = revenueConfig.keySelector(order.created_at);
+    if (!revenueByBucket.has(key)) {
       continue;
     }
-    revenueByDay.set(key, revenueByDay.get(key) + toNumber(order.total));
+    revenueByBucket.set(key, revenueByBucket.get(key) + toNumber(order.total));
   }
 
   return {
+    range: revenueConfig.range,
     kpis: {
       todaysOrders: todayOrdersCountRes.count || 0,
       todaysRevenue: (todayRevenueRes.data || []).reduce((sum, row) => sum + toNumber(row.total), 0),
@@ -114,9 +221,9 @@ export async function fetchAdminDashboardSnapshot() {
         total: toNumber(order.total),
       };
     }),
-    revenueTrend: revenueDays.map((day) => ({
-      day: day.label,
-      revenue: Number((revenueByDay.get(day.key) || 0).toFixed(2)),
+    revenueTrend: revenueConfig.buckets.map((bucket) => ({
+      label: bucket.label,
+      revenue: Number((revenueByBucket.get(bucket.key) || 0).toFixed(2)),
     })),
   };
 }
@@ -133,14 +240,23 @@ export async function quickEditProduct(productId, { pricePhp, stockQuantity }) {
     stock: Number(stockQuantity),
   };
 
-  const updateRes = await supabase.from("products").update(nextPayload).eq("id", productId).select("*").single();
+  const updateRes = await supabase.from("products").update(nextPayload).eq("id", productId).select("*").maybeSingle();
   assertNoError(updateRes.error, "Unable to update product");
-  return mapProductRow(updateRes.data);
+
+  if (updateRes.data) {
+    return mapProductRow(updateRes.data);
+  }
+
+  return getProductById(productId, "Unable to update product");
 }
 
 export async function restockProduct(productId, quantityToAdd) {
-  const currentRes = await supabase.from("products").select("id, stock").eq("id", productId).single();
+  const currentRes = await supabase.from("products").select("id, stock").eq("id", productId).maybeSingle();
   assertNoError(currentRes.error, "Unable to load current stock");
+
+  if (!currentRes.data) {
+    throw new Error("Unable to load current stock: Product not found.");
+  }
 
   const currentStock = toNumber(currentRes.data?.stock);
   const nextStock = currentStock + Number(quantityToAdd || 0);
@@ -150,10 +266,15 @@ export async function restockProduct(productId, quantityToAdd) {
     .update({ stock: nextStock })
     .eq("id", productId)
     .select("*")
-    .single();
+    .maybeSingle();
 
   assertNoError(updateRes.error, "Unable to restock product");
-  return mapProductRow(updateRes.data);
+
+  if (updateRes.data) {
+    return mapProductRow(updateRes.data);
+  }
+
+  return getProductById(productId, "Unable to restock product");
 }
 
 export async function uploadProductImage(file) {
@@ -165,15 +286,34 @@ export async function uploadProductImage(file) {
   const safeExt = extension.replace(/[^a-zA-Z0-9]/g, "") || "jpg";
   const filePath = `products/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${safeExt}`;
 
-  const uploadRes = await supabase.storage.from(DEFAULT_PRODUCT_BUCKET).upload(filePath, file, {
-    cacheControl: "3600",
-    upsert: false,
-  });
+  let lastUploadError = null;
+  for (const bucketName of PRODUCT_BUCKET_CANDIDATES) {
+    const uploadRes = await supabase.storage.from(bucketName).upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
 
-  assertNoError(uploadRes.error, `Unable to upload image to bucket \"${DEFAULT_PRODUCT_BUCKET}\"`);
+    if (uploadRes.error) {
+      lastUploadError = uploadRes.error;
+      if (isBucketNotFoundError(uploadRes.error)) {
+        continue;
+      }
 
-  const publicUrlRes = supabase.storage.from(DEFAULT_PRODUCT_BUCKET).getPublicUrl(filePath);
-  return publicUrlRes.data?.publicUrl || "";
+      if (isStorageRlsError(uploadRes.error)) {
+        throw new Error(
+          `Unable to upload image to bucket \"${bucketName}\": storage RLS blocked INSERT. Add an INSERT policy on storage.objects for this bucket (anon role for current app setup).`
+        );
+      }
+
+      throw new Error(`Unable to upload image to bucket \"${bucketName}\": ${uploadRes.error.message}`);
+    }
+
+    const publicUrlRes = supabase.storage.from(bucketName).getPublicUrl(filePath);
+    return publicUrlRes.data?.publicUrl || "";
+  }
+
+  const primaryBucket = PRODUCT_BUCKET_CANDIDATES[0] || DEFAULT_PRODUCT_BUCKET;
+  throw new Error(`Unable to upload image to bucket \"${primaryBucket}\": ${lastUploadError?.message || "Unknown storage error"}`);
 }
 
 export async function addInventoryProduct({ name, category, pricePhp, description, imageUrl }) {

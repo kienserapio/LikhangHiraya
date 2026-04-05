@@ -21,7 +21,7 @@ export default function LoginPage() {
   const login = useAuthStore((state) => state.login);
   const rememberMeUsername = useAuthStore((state) => state.rememberMeUsername);
   const [form, setForm] = useState({ usernameOrEmail: rememberMeUsername || "", password: "" });
-  const [loginAsRole, setLoginAsRole] = useState("CUSTOMER");
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(Boolean(rememberMeUsername));
   const [errors, setErrors] = useState({});
 
@@ -34,7 +34,7 @@ export default function LoginPage() {
     }
 
     try {
-      await login(form, rememberMe, loginAsRole);
+      await login(form, rememberMe);
       navigate("/mfa");
     } catch (error) {
       setErrors({ password: [error.message || "Invalid credentials"] });
@@ -66,7 +66,10 @@ export default function LoginPage() {
         <div className={styles.card}>
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="usernameOrEmail">Username or Email:</label>
+              <label className={styles.label} htmlFor="usernameOrEmail">
+                Username or Email:
+                <span className={styles["required-star"]}>*</span>
+              </label>
               <input
                 id="usernameOrEmail"
                 className={styles.input}
@@ -77,14 +80,24 @@ export default function LoginPage() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="password">Password:</label>
+              <label className={styles.label} htmlFor="password">
+                Password:
+                <span className={styles["required-star"]}>*</span>
+              </label>
               <input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 className={styles.input}
                 value={form.password}
                 onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
               />
+              <button
+                type="button"
+                className={styles.passwordToggleText}
+                onClick={() => setShowPassword((previous) => !previous)}
+              >
+                {showPassword ? "Hide password" : "View password"}
+              </button>
               <p className={styles.subtitle} style={{ marginTop: 4, fontSize: "0.82rem" }}>
                 Must be 8+ characters with uppercase, lowercase, number, and special character.
               </p>
@@ -96,24 +109,11 @@ export default function LoginPage() {
               <span>Remember me</span>
             </label>
 
-            <div className={styles.field}>
-              <label className={styles.label}>Login as:</label>
-              <select
-                className={styles.input}
-                value={loginAsRole}
-                onChange={(event) => setLoginAsRole(event.target.value)}
-              >
-                <option value="CUSTOMER">Customer</option>
-                <option value="RIDER">Delivery Rider</option>
-                <option value="ADMIN">Admin</option>
-              </select>
-            </div>
-
             <button className={styles.submit} type="submit">Login</button>
           </form>
 
           <div className={styles.row}>
-            <Link className={styles.forgotLink} to="/forgot-password">Forgot Password?</Link>
+            <span className={styles.forgotLink}>Don't have an account?</span>
             <Link className={styles.link} to="/register">Sign up</Link>
           </div>
           <div className={styles.row} style={{ marginTop: 8 }}>

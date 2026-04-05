@@ -1,18 +1,75 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { clearActiveOrders, getActiveOrders, subscribeToActiveOrders } from "../services/activeOrders";
+import { hasCustomerDeliverySuccessBeenSeen } from "../services/deliverySuccessState";
 import styles from "./ActiveOrdersDock.module.css";
 
-const statuses = [
-  "PENDING",
-  "CONFIRMED",
-  "PREPARING",
-  "RIDER_ASSIGNED",
-  "PICKED_UP",
-  "IN_TRANSIT",
-  "ARRIVED",
-  "DELIVERED",
+const progressSteps = [
+  { key: "PENDING", label: "Pending" },
+  { key: "CONFIRMED", label: "Confirmed" },
+  { key: "RIDER_ASSIGNED", label: "Rider Assigned" },
+  { key: "PICKED_UP", label: "Picked Up" },
+  { key: "IN_TRANSIT", label: "In Transit" },
+  { key: "ARRIVED", label: "Arrived" },
+  { key: "DELIVERED", label: "Delivered" },
 ];
+
+function statusToProgressIndex(status) {
+  const normalized = String(status || "").trim().toUpperCase();
+  if (normalized === "PREPARING") {
+    return 1;
+  }
+  const index = progressSteps.findIndex((step) => step.key === normalized);
+  return index < 0 ? 0 : index;
+}
+
+function formatDateTime(value) {
+  if (!value) {
+    return "--";
+  }
+
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function orderStatusLabel(status) {
+  const normalized = String(status || "").trim().toUpperCase();
+  const step = progressSteps.find((item) => item.key === normalized);
+  if (step) {
+    return step.label;
+  }
+  return normalized ? normalized.replaceAll("_", " ") : "Pending";
+}
+
+function buildEtaLabel(order) {
+  const normalizedStatus = String(order?.status || "").trim().toUpperCase();
+
+  if (normalizedStatus === "DELIVERED") {
+    return "Order delivered successfully.";
+  }
+
+  if (order?.picked_up_at) {
+    const pickedUpAt = new Date(order.picked_up_at);
+    const eta = new Date(pickedUpAt.getTime() + 15 * 60 * 1000);
+    const formatter = new Intl.DateTimeFormat("en-PH", { hour: "numeric", minute: "2-digit" });
+    return `Picked up at ${formatter.format(pickedUpAt)}. Estimated arrival: ${formatter.format(eta)}`;
+  }
+
+  if (normalizedStatus === "RIDER_ASSIGNED") {
+    return "Your rider is heading to the cafe for pickup.";
+  }
+
+  if (normalizedStatus === "CONFIRMED" || normalizedStatus === "PREPARING") {
+    return "Your order is being prepared.";
+  }
+
+  return "Waiting for rider assignment.";
+}
 
 function toPeso(value) {
   return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(Number(value || 0));
@@ -20,6 +77,7 @@ function toPeso(value) {
 
 export default function ActiveOrdersDock() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [orderIds, setOrderIds] = useState([]);
   const [isOpen, setIsOpen] = useState(Boolean(location.state?.openActiveOrders));
@@ -55,11 +113,16 @@ export default function ActiveOrdersDock() {
     if (deliveredAlertedRef.current.has(normalizedOrderId)) {
       return;
     }
+    if (hasCustomerDeliverySuccessBeenSeen(normalizedOrderId)) {
+      return;
+    }
 
     deliveredAlertedRef.current.add(normalizedOrderId);
-    window.alert("Order completed successfully.");
     setIsOpen(false);
-  }, []);
+    navigate(`/delivery-success/${normalizedOrderId}`, {
+      state: { orderId: normalizedOrderId },
+    });
+  }, [navigate]);
 
   useEffect(() => {
     let cleanup = () => {};
@@ -112,17 +175,31 @@ export default function ActiveOrdersDock() {
 
             <div className={styles.ordersList}>
               {orders.map((order) => {
-                const activeIndex = Math.max(0, statuses.indexOf(order.status));
-                const pickedUpAt = order.picked_up_at ? new Date(order.picked_up_at) : null;
-                const eta = pickedUpAt ? new Date(pickedUpAt.getTime() + 15 * 60 * 1000) : null;
-                const timeFormatter = new Intl.DateTimeFormat("en-PH", { hour: "numeric", minute: "2-digit" });
+                const activeIndex = statusToProgressIndex(order.status);
+                const riderName = String(order.rider_name || order.riderName || "").trim();
+                const riderPhone = String(order.rider_phone || order.riderPhone || "").trim();
 
                 return (
                   <article key={order.id} className={styles.orderCard}>
                     <div className={styles.topLine}>
                       <strong>Order #{order.id.slice(0, 8)}</strong>
-                      <span>{order.status.replaceAll("_", " ")}</span>
+                      <span>{orderStatusLabel(order.status)}</span>
                     </div>
+
+                    <p className={styles.metaText}>Placed: {formatDateTime(order.created_at)}</p>
+
+                    <div className={styles.riderPanel}>
+                      <div className={styles.riderMeta}>
+                        <p className={styles.metaLabel}>Rider</p>
+                        <p className={styles.metaValue}>{riderName || "Assigning rider..."}</p>
+                      </div>
+                      <div className={styles.riderMeta}>
+                        <p className={styles.metaLabel}>Contact</p>
+                        <p className={styles.metaValue}>{riderPhone || "--"}</p>
+                      </div>
+                    </div>
+
+                    <p className={styles.etaText}>{buildEtaLabel(order)}</p>
 
                     <div className={styles.items}>
                       {order.items.map((item) => (
@@ -139,19 +216,20 @@ export default function ActiveOrdersDock() {
                       <strong>{toPeso(order.total)}</strong>
                     </div>
 
-                    {eta && order.status !== "DELIVERED" ? (
-                      <p style={{ margin: "8px 0 0", color: "#6b7280", fontSize: "0.84rem" }}>
-                        Rider picked up your order at {timeFormatter.format(pickedUpAt)}. Estimated arrival: {timeFormatter.format(eta)}
-                      </p>
-                    ) : null}
+                    <p className={styles.progressText}>Current Status: {orderStatusLabel(order.status)}</p>
 
-                    <div className={styles.stepper}>
-                      {statuses.slice(0, 7).map((step, index) => (
-                        <div key={step} className={index <= activeIndex ? styles.stepActive : styles.step}>
-                          <span className={styles.dot} />
-                          <small>{step.replaceAll("_", " ")}</small>
-                        </div>
-                      ))}
+                    <div className={styles.progressScroll}>
+                      <div className={styles.progressStepper}>
+                        {progressSteps.map((step, index) => {
+                          const completed = index <= activeIndex;
+                          return (
+                            <div key={step.key} className={`${styles.progressStep} ${completed ? styles.progressStepActive : ""}`}>
+                              <span className={styles.progressDot}>{completed ? "✓" : index + 1}</span>
+                              <small>{step.label}</small>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </article>
                 );

@@ -10,7 +10,8 @@ import {
 } from "recharts";
 import { fetchAdminDashboardSnapshot } from "../../services/adminApi";
 import { supabase } from "../../services/supabaseClient";
-import styles from "./Admin.module.css";
+import adminStyles from "./Admin.module.css";
+import styles from "./Dashboard.module.css";
 
 function toPeso(value) {
   return new Intl.NumberFormat("en-PH", {
@@ -23,18 +24,19 @@ function toPeso(value) {
 function statusClass(status) {
   const normalized = String(status || "").toUpperCase();
   if (normalized === "DELIVERED") {
-    return `${styles.statusBadge} ${styles.statusDelivered}`;
+    return `${adminStyles.statusBadge} ${adminStyles.statusDelivered}`;
   }
   if (normalized === "PENDING") {
-    return `${styles.statusBadge} ${styles.statusPending}`;
+    return `${adminStyles.statusBadge} ${adminStyles.statusPending}`;
   }
   if (normalized === "IN_TRANSIT" || normalized === "ARRIVED" || normalized === "PICKED_UP") {
-    return `${styles.statusBadge} ${styles.statusTransit}`;
+    return `${adminStyles.statusBadge} ${adminStyles.statusTransit}`;
   }
-  return styles.statusBadge;
+  return adminStyles.statusBadge;
 }
 
 const INITIAL_DASHBOARD = {
+  range: "WEEK",
   kpis: {
     todaysOrders: 0,
     todaysRevenue: 0,
@@ -45,10 +47,17 @@ const INITIAL_DASHBOARD = {
   revenueTrend: [],
 };
 
+const DASHBOARD_RANGE_OPTIONS = [
+  { value: "WEEK", label: "Weekly" },
+  { value: "MONTH", label: "Monthly" },
+  { value: "YEAR", label: "Yearly" },
+];
+
 export default function Dashboard() {
   const [dashboard, setDashboard] = useState(INITIAL_DASHBOARD);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [timeRange, setTimeRange] = useState("WEEK");
 
   const loadDashboard = useCallback(async (background = false) => {
     if (!background) {
@@ -56,7 +65,7 @@ export default function Dashboard() {
     }
 
     try {
-      const next = await fetchAdminDashboardSnapshot();
+      const next = await fetchAdminDashboardSnapshot(timeRange);
       setDashboard(next);
       setError("");
     } catch (loadError) {
@@ -64,7 +73,7 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [timeRange]);
 
   useEffect(() => {
     loadDashboard(false);
@@ -89,65 +98,116 @@ export default function Dashboard() {
     };
   }, [loadDashboard]);
 
+  const todayLabel = new Intl.DateTimeFormat("en-PH", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  }).format(new Date());
+
   return (
-    <section className={styles.pageSection}>
-      <div className={styles.sectionHeader}>
-        <div>
-          <h2 className={styles.sectionTitle}>Admin Dashboard</h2>
-          <p className={styles.sectionSub}>Live operations overview of orders, riders, and revenue.</p>
+    <section className={styles.dashboardPage}>
+      <div className={styles.overviewHeader}>
+        <div className={styles.overviewText}>
+          <h2 className={styles.overviewTitle}>Dashboard Overview</h2>
+          <p className={styles.overviewSub}>Welcome back. Here is what is happening with Likhang Hiraya today.</p>
         </div>
-        <button type="button" className={styles.buttonSecondary} onClick={() => loadDashboard(false)}>
-          Refresh
-        </button>
+
+        <div className={styles.overviewActions}>
+          <div className={styles.dateChip}>
+            <span className={styles.dateIcon} aria-hidden="true">🗓</span>
+            <span>{todayLabel}</span>
+          </div>
+          <button type="button" className={adminStyles.buttonSecondary} onClick={() => loadDashboard(false)}>
+            Refresh
+          </button>
+        </div>
       </div>
 
-      {error ? <p className={styles.error}>{error}</p> : null}
+      {error ? <p className={adminStyles.error}>{error}</p> : null}
 
       <div className={styles.kpiGrid}>
         <article className={styles.kpiCard}>
+          <div className={styles.kpiIconBubble} aria-hidden="true">🛒</div>
           <p className={styles.kpiLabel}>Today's Orders</p>
           <p className={styles.kpiValue}>{dashboard.kpis.todaysOrders}</p>
         </article>
+
         <article className={styles.kpiCard}>
+          <div className={styles.kpiIconBubble} aria-hidden="true">₱</div>
           <p className={styles.kpiLabel}>Today's Revenue</p>
           <p className={styles.kpiValue}>{toPeso(dashboard.kpis.todaysRevenue)}</p>
         </article>
+
         <article className={styles.kpiCard}>
+          <div className={styles.kpiIconBubble} aria-hidden="true">🛵</div>
           <p className={styles.kpiLabel}>Active Riders</p>
           <p className={styles.kpiValue}>{dashboard.kpis.activeRiders}</p>
         </article>
+
         <article className={styles.kpiCard}>
+          <div className={styles.kpiIconBubble} aria-hidden="true">⏳</div>
           <p className={styles.kpiLabel}>Pending Orders</p>
           <p className={styles.kpiValue}>{dashboard.kpis.pendingOrders}</p>
         </article>
       </div>
 
-      <div className={styles.gridTwo}>
-        <section className={styles.panel}>
-          <h3>Revenue Trend (Last 7 Days)</h3>
+      <div className={styles.mainStack}>
+        <section className={styles.chartPanel}>
+          <div className={styles.panelHeader}>
+            <div>
+              <h3 className={styles.panelTitle}>Revenue Trends</h3>
+              <p className={styles.panelSub}>Performance overview from Supabase order history.</p>
+            </div>
+
+            <div className={styles.segmentedControl} role="tablist" aria-label="Revenue trend range">
+              {DASHBOARD_RANGE_OPTIONS.map((option) => {
+                const isActive = option.value === timeRange;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`${styles.segmentButton} ${isActive ? styles.segmentButtonActive : ""}`.trim()}
+                    onClick={() => setTimeRange(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className={styles.chartBox}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dashboard.revenueTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="day" />
+                <XAxis dataKey="label" />
                 <YAxis tickFormatter={(value) => `P${Number(value).toLocaleString()}`} />
                 <Tooltip formatter={(value) => toPeso(value)} />
-                <Line type="monotone" dataKey="revenue" stroke="#7c4f34" strokeWidth={3} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="revenue" stroke="#6f4e37" strokeWidth={3} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </section>
 
-        <section className={styles.panel}>
-          <h3>Recent Orders</h3>
+        <section className={styles.tablePanel}>
+          <div className={styles.panelHeader}>
+            <div>
+              <h3 className={styles.panelTitle}>Recent Orders</h3>
+              <p className={styles.panelSub}>Latest customer activity from Supabase orders.</p>
+            </div>
+            <button type="button" className={styles.viewAllButton} onClick={() => loadDashboard(false)}>
+              Refresh List
+            </button>
+          </div>
+
           <div className={styles.tableWrap}>
-            <table className={styles.table}>
+            <table className={styles.recentOrdersTable}>
               <thead>
                 <tr>
                   <th>ID</th>
                   <th>Customer</th>
                   <th>Status</th>
-                  <th>Total</th>
+                  <th className={styles.alignRight}>Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -160,12 +220,12 @@ export default function Dashboard() {
                 ) : (
                   dashboard.recentOrders.map((order) => (
                     <tr key={order.id}>
-                      <td>{order.id.slice(0, 8)}...</td>
+                      <td>#{order.id.slice(0, 8)}</td>
                       <td>{order.customerName}</td>
                       <td>
                         <span className={statusClass(order.status)}>{order.status}</span>
                       </td>
-                      <td>{toPeso(order.total)}</td>
+                      <td className={styles.alignRight}>{toPeso(order.total)}</td>
                     </tr>
                   ))
                 )}
@@ -173,6 +233,14 @@ export default function Dashboard() {
             </table>
           </div>
         </section>
+      </div>
+
+      <div className={styles.systemStatus}>
+        <p className={styles.systemStatusLabel}>System Status</p>
+        <div className={styles.systemStatusRow}>
+          <span className={`${styles.systemDot} ${error ? styles.systemDotWarn : ""}`} aria-hidden="true" />
+          <span>{error ? "Realtime sync issue detected" : "All systems operational"}</span>
+        </div>
       </div>
     </section>
   );

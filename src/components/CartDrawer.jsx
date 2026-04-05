@@ -30,20 +30,20 @@ export default function CartDrawer() {
         <div className={styles.items}>
           {items.length === 0 ? <p>Your cart is empty.</p> : null}
           {items.map((item) => (
-            <article key={item.id} className={styles.item}>
+            <article key={item.cartKey || item.id} className={styles.item}>
               <div>
                 <h3>{item.name}</h3>
                 <p>{toPeso(item.pricePhp)}</p>
               </div>
               <div className={styles.actions}>
-                <button onClick={() => decrement(item.id)} aria-label={`Decrease ${item.name}`}>
+                <button onClick={() => decrement(item.cartKey || item.id)} aria-label={`Decrease ${item.name}`}>
                   -
                 </button>
                 <span>{item.quantity}</span>
-                <button onClick={() => increment(item.id)} aria-label={`Increase ${item.name}`}>
+                <button onClick={() => increment(item.cartKey || item.id)} aria-label={`Increase ${item.name}`}>
                   +
                 </button>
-                <button onClick={() => removeItem(item.id)} aria-label={`Remove ${item.name}`}>
+                <button onClick={() => removeItem(item.cartKey || item.id)} aria-label={`Remove ${item.name}`}>
                   Remove
                 </button>
               </div>

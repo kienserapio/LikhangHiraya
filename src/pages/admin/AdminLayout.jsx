@@ -9,6 +9,12 @@ function navLinkClass({ isActive }) {
   return `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`.trim();
 }
 
+const navItems = [
+  { to: "/admin/dashboard", label: "Dashboard", icon: "▦" },
+  { to: "/admin/inventory", label: "Inventory", icon: "◫" },
+  { to: "/admin/analytics", label: "Analytics", icon: "◍" },
+];
+
 export default function AdminLayout() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
@@ -79,20 +85,22 @@ export default function AdminLayout() {
     <div className={styles.adminShell}>
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
-          <h1 className={styles.brandTitle}>Likhang Hiraya</h1>
-          <p className={styles.brandSub}>Admin Console</p>
+          <div className={styles.brandRow}>
+            <img className={styles.brandLogo} src="/assets/hiraya.png" alt="Likhang Hiraya" />
+            <div>
+              <h1 className={styles.brandTitle}>Likhang Hiraya</h1>
+              <p className={styles.brandSub}>Restaurant Console</p>
+            </div>
+          </div>
         </div>
 
         <nav className={styles.nav}>
-          <NavLink to="/admin/dashboard" className={navLinkClass}>
-            Dashboard
-          </NavLink>
-          <NavLink to="/admin/inventory" className={navLinkClass}>
-            Inventory
-          </NavLink>
-          <NavLink to="/admin/analytics" className={navLinkClass}>
-            Analytics
-          </NavLink>
+          {navItems.map((item) => (
+            <NavLink key={item.to} to={item.to} className={navLinkClass}>
+              <span className={styles.navIcon} aria-hidden="true">{item.icon}</span>
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
         </nav>
 
         <div className={styles.sidebarFooter}>

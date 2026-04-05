@@ -1,0 +1,206 @@
+.analyticsPage {
+  display: grid;
+  gap: 16px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pageTitle {
+  margin: 0;
+  color: #553722;
+  font-size: clamp(1.45rem, 2.7vw, 2rem);
+  font-weight: 800;
+}
+
+.pageSub {
+  margin: 6px 0 0;
+  color: #7f736c;
+  font-size: 0.9rem;
+}
+
+.pageHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metricCard {
+  background: #ffffff;
+  border: 1px solid #eadfd2;
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.metricCardWarn {
+  background: #fff6f4;
+  border-color: #efcbc2;
+}
+
+.metricLabel {
+  margin: 0;
+  color: #7f736c;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.metricValue {
+  margin: 10px 0 0;
+  color: #553722;
+  font-size: clamp(1.05rem, 2.4vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.chartPanel,
+.tablePanel {
+  background: #ffffff;
+  border: 1px solid #eadfd2;
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.panelTitle {
+  margin: 0;
+  color: #553722;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.panelSub {
+  margin: 4px 0 0;
+  color: #82746d;
+  font-size: 0.8rem;
+}
+
+.liveNote {
+  margin: 0;
+  color: #14532d;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.topRider {
+  margin: 0;
+  color: #553722;
+  font-size: 0.77rem;
+  font-weight: 800;
+}
+
+.chartBox {
+  width: 100%;
+  height: 290px;
+}
+
+.dataGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 300px;
+}
+
+.dataTable thead {
+  background: #faf6f3;
+}
+
+.dataTable th,
+.dataTable td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid #efe6df;
+  font-size: 0.84rem;
+}
+
+.dataTable th {
+  color: #7f736c;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.alignRight {
+  text-align: right !important;
+}
+
+.emptyState {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.84rem;
+}
+
+.stockWarn,
+.stockCritical {
+  font-weight: 800;
+}
+
+.stockWarn {
+  color: #b45309;
+}
+
+.stockCritical {
+  color: #b91c1c;
+}
+
+@media (max-width: 1100px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dataGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .panelHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .chartBox {
+    height: 250px;
+  }
+}

@@ -30,16 +30,18 @@
   z-index: 40;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .modal {
-  width: min(430px, 100%);
-  max-height: 70vh;
+  width: 100%;
+  height: 100%;
+  max-height: 100vh;
   background: #ffffff;
-  border-radius: 16px 16px 0 0;
-  padding: 16px;
+  border-radius: 0;
+  padding: 18px;
   display: grid;
+  grid-template-rows: auto 1fr auto;
   gap: 12px;
 }
 
@@ -87,9 +89,9 @@
 .orderCard {
   border: 1px solid #f0e5db;
   border-radius: 12px;
-  padding: 10px;
+  padding: 14px;
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .topLine {
@@ -103,6 +105,47 @@
 .topLine span {
   color: #9d6b4b;
   font-weight: 700;
+}
+
+.metaText {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.76rem;
+}
+
+.riderPanel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  background: #faf8f6;
+  border: 1px solid #efe5dc;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.riderMeta {
+  display: grid;
+  gap: 2px;
+}
+
+.metaLabel {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.metaValue {
+  margin: 0;
+  color: #1f2937;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.etaText {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.82rem;
 }
 
 .items {
@@ -130,40 +173,109 @@
   color: #111111;
 }
 
-.stepper {
+.progressText {
+  margin: 0;
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.progressScroll {
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.progressStepper {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(92px, 1fr));
   gap: 6px;
+  min-width: 665px;
 }
 
-.step,
-.stepActive {
+.progressStep {
+  position: relative;
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 6px;
+  justify-items: center;
+  gap: 4px;
 }
 
-.step {
-  color: #a5856f;
+.progressStep:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 11px;
+  left: calc(50% + 14px);
+  width: calc(100% - 28px);
+  height: 2px;
+  background: #d7d5d1;
 }
 
-.stepActive {
-  color: #111111;
-}
-
-.dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
-  background: #d8c8bc;
-}
-
-.stepActive .dot {
+.progressStepActive:not(:last-child)::after {
   background: #9d6b4b;
 }
 
-.step small,
-.stepActive small {
-  font-size: 0.68rem;
+.progressDot {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #d7d5d1;
+  background: #ffffff;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.progressStepActive .progressDot {
+  border-color: #9d6b4b;
+  background: #9d6b4b;
+  color: #ffffff;
+}
+
+.progressStep small {
+  font-size: 0.64rem;
+  color: #6b7280;
+}
+
+.progressStepActive small {
+  color: #111111;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .progressStepper {
+    min-width: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .progressStep {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 6px 4px;
+    background: #ffffff;
+  }
+
+  .progressStep:not(:last-child)::after {
+    display: none;
+  }
+
+  .progressStep small {
+    text-align: center;
+    line-height: 1.2;
+  }
+}
+
+@media (max-width: 420px) {
+  .modal {
+    padding: 12px;
+  }
+
+  .riderPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .progressStepper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

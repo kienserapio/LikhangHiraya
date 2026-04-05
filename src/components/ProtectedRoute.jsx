@@ -6,20 +6,25 @@ export default function ProtectedRoute({ children, requireMfa = false, allowedRo
   const token = useAuthStore((state) => state.token);
   const mfaVerified = useAuthStore((state) => state.mfaVerified);
   const user = useAuthStore((state) => state.user);
+  const normalizedRole = String(user?.role || "").toUpperCase();
 
   if (!token) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  if (!user || !normalizedRole) {
+    return <Navigate to="/login" replace />;
   }
 
   if (requireMfa && !mfaVerified) {
     return <Navigate to="/mfa" replace />;
   }
 
-  if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
-    if (user.role === "RIDER") {
+  if (allowedRoles.length > 0 && !allowedRoles.includes(normalizedRole)) {
+    if (normalizedRole === "RIDER") {
       return <Navigate to="/rider/dashboard" replace />;
     }
-    if (user.role === "ADMIN") {
+    if (normalizedRole === "ADMIN") {
       return <Navigate to="/admin/dashboard" replace />;
     }
     return <Navigate to="/home" replace />;

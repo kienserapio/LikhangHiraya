@@ -1,0 +1,92 @@
+@import "./GcashFlow.shared.css";
+
+.gcash-pin-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.gcash-pin-main {
+  display: grid;
+  gap: 22px;
+}
+
+.gcash-pin-identity {
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.gcash-pin-lock {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: var(--gcash-surface-low);
+  border: 1px solid rgba(212, 195, 186, 0.45);
+  color: var(--gcash-primary);
+  display: grid;
+  place-items: center;
+}
+
+.gcash-pin-lock svg {
+  width: 34px;
+  height: 34px;
+}
+
+.gcash-pin-visual {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+.gcash-pin-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 999px;
+  background: #e6e1e1;
+  transition: transform 0.16s ease, background-color 0.16s ease;
+}
+
+.gcash-pin-dot-filled {
+  background: #1c1b1b;
+  transform: scale(1.06);
+}
+
+.gcash-pin-actions {
+  display: grid;
+}
+
+.gcash-pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+.gcash-keypad-btn {
+  min-height: 62px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--gcash-text);
+  font-family: "Manrope", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gcash-keypad-btn:hover {
+  background: var(--gcash-surface-low);
+}
+
+.gcash-keypad-btn:active {
+  transform: scale(0.97);
+}
+
+.gcash-keypad-back {
+  color: var(--gcash-text-muted);
+}
+
+.gcash-keypad-back svg {
+  width: 26px;
+  height: 26px;
+}

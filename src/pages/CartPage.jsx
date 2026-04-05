@@ -36,7 +36,7 @@ export default function CartPage() {
         <section className="items" id="order-items-list">
           {items.length === 0 ? <p>Your cart is empty.</p> : null}
           {items.map((item) => (
-            <div className="item-card" key={item.id} data-purpose="order-item-card">
+            <div className="item-card" key={item.cartKey || item.id} data-purpose="order-item-card">
               <div className="thumb">
                 <img alt={item.name} src={item.imageUrl || ""} />
               </div>
@@ -49,11 +49,11 @@ export default function CartPage() {
                   <div className="rate"><span>★</span> 4.8</div>
                 </div>
                 <div className="qty-row">
-                  <button className="qty-btn" onClick={() => decrement(item.id)} aria-label="Decrease quantity">
+                  <button className="qty-btn" onClick={() => decrement(item.cartKey || item.id)} aria-label="Decrease quantity">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M20 12H4" /></svg>
                   </button>
                   <span className="qty-val">{item.quantity}</span>
-                  <button className="qty-btn" onClick={() => increment(item.id)} aria-label="Increase quantity">
+                  <button className="qty-btn" onClick={() => increment(item.cartKey || item.id)} aria-label="Increase quantity">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
                   </button>
                 </div>

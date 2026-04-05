@@ -101,6 +101,12 @@
   font-weight: 400;
 }
 
+.required-star {
+  color: #b91c1c;
+  margin-left: 0.2rem;
+  font-weight: 700;
+}
+
 .input {
   width: 100%;
   border: 1.6px solid #a68f82;
@@ -124,6 +130,22 @@
   color: #b42318;
   font-size: 0.84rem;
   font-weight: 400;
+}
+
+.passwordToggleText {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.passwordToggleText:hover {
+  color: #374151;
 }
 
 .checkRow {

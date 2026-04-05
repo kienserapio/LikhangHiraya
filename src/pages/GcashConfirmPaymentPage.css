@@ -1,0 +1,146 @@
+@import "./GcashFlow.shared.css";
+
+.gcash-confirm-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.gcash-confirm-stepper {
+  display: grid;
+  grid-template-columns: auto 1fr auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.gcash-confirm-step {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.gcash-confirm-step small {
+  color: var(--gcash-outline-strong);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.gcash-confirm-step-done small {
+  color: var(--gcash-primary);
+}
+
+.gcash-confirm-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #d4c3ba;
+}
+
+.gcash-confirm-step-done .gcash-confirm-dot {
+  background: var(--gcash-primary);
+  box-shadow: 0 0 0 4px rgba(234, 189, 160, 0.44);
+}
+
+.gcash-confirm-line {
+  height: 2px;
+  background: #e6e1e1;
+}
+
+.gcash-confirm-line-done {
+  background: #eabda0;
+}
+
+.gcash-confirm-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.gcash-confirm-eyebrow {
+  margin: 0;
+  color: var(--gcash-outline-strong);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.gcash-confirm-amount {
+  margin-top: 8px;
+  font-size: 2.25rem;
+}
+
+.gcash-confirm-merchant {
+  margin: 6px 0 0;
+  color: var(--gcash-primary);
+  font-weight: 700;
+}
+
+.gcash-confirm-info {
+  display: grid;
+  gap: 12px;
+}
+
+.gcash-confirm-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.gcash-confirm-row span {
+  color: var(--gcash-text-soft);
+  font-size: 0.87rem;
+}
+
+.gcash-confirm-row strong {
+  color: var(--gcash-text);
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.gcash-confirm-total-row {
+  padding-top: 12px;
+  border-top: 1px solid rgba(212, 195, 186, 0.5);
+}
+
+.gcash-confirm-total-row span,
+.gcash-confirm-total-row strong {
+  color: var(--gcash-primary);
+  font-family: "Manrope", sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.gcash-confirm-note {
+  margin: 16px 2px 0;
+  color: var(--gcash-text-soft);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.gcash-confirm-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  width: min(100%, 440px);
+  margin: 0 auto;
+  padding: 14px 20px 18px;
+  display: grid;
+  gap: 8px;
+  background: rgba(253, 248, 248, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.gcash-cancel-btn {
+  border: 0;
+  background: transparent;
+  color: var(--gcash-text-soft);
+  font-size: 0.88rem;
+  font-weight: 700;
+  min-height: 40px;
+  cursor: pointer;
+}

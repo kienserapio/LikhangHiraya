@@ -1,0 +1,129 @@
+@import "./GcashFlow.shared.css";
+
+.gcash-login-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.gcash-login-merchant {
+  text-align: center;
+  display: grid;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.gcash-login-label {
+  margin: 0;
+  color: var(--gcash-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.gcash-login-brand {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--gcash-primary);
+}
+
+.gcash-login-amount-wrap {
+  padding-top: 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.gcash-login-amount {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--gcash-text);
+}
+
+.gcash-login-form {
+  display: grid;
+  gap: 14px;
+}
+
+.gcash-login-input-label {
+  color: var(--gcash-text);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.gcash-mobile-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  border-radius: 14px;
+  background: var(--gcash-surface-low);
+  border: 1px solid rgba(212, 195, 186, 0.45);
+  padding: 0 14px;
+}
+
+.gcash-mobile-prefix {
+  font-family: "Manrope", sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--gcash-text);
+  border-right: 1px solid var(--gcash-outline);
+  padding-right: 10px;
+}
+
+.gcash-mobile-input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--gcash-text);
+  font-family: "Manrope", sans-serif;
+  font-size: 1.06rem;
+  font-weight: 700;
+}
+
+.gcash-mobile-input::placeholder {
+  color: #9c8f88;
+}
+
+.gcash-login-disclaimer {
+  margin: 0;
+  color: var(--gcash-text-soft);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.gcash-login-security {
+  margin-top: 28px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.gcash-login-security p {
+  margin: 0;
+  color: #8f8580;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.gcash-login-dots {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.gcash-login-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(85, 55, 34, 0.26);
+}
+
+.gcash-login-dots span:nth-child(2) {
+  background: rgba(85, 55, 34, 0.45);
+}

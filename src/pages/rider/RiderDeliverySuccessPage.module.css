@@ -1,0 +1,265 @@
+.page {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #1c1b1b;
+}
+
+.topBar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.93);
+  border-bottom: 1px solid rgba(230, 225, 225, 0.7);
+  backdrop-filter: blur(10px);
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #ece7e7;
+  color: #553722;
+  display: grid;
+  place-items: center;
+}
+
+.avatar svg {
+  width: 20px;
+  height: 20px;
+}
+
+.brandTitle {
+  font-size: 1.08rem;
+  font-family: "Manrope", sans-serif;
+  font-weight: 800;
+  color: #553722;
+}
+
+.onlineState {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #553722;
+}
+
+.onlineState span {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #523a00;
+  box-shadow: 0 0 0 5px rgba(82, 58, 0, 0.13);
+}
+
+.main {
+  width: min(100%, 640px);
+  margin: 0 auto;
+  padding: 24px 16px 36px;
+  display: grid;
+  gap: 14px;
+}
+
+.hero {
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.heroIcon {
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #553722, #6f4e37);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 20px 24px -16px rgba(85, 55, 34, 0.8);
+}
+
+.heroIcon svg {
+  width: 36px;
+  height: 36px;
+}
+
+.hero h1 {
+  margin: 0;
+  color: #553722;
+  font-family: "Manrope", sans-serif;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+}
+
+.hero p {
+  margin: 0;
+  color: #50453e;
+  font-size: 0.95rem;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.kpiCard,
+.summaryCard {
+  border: 1px solid rgba(212, 195, 186, 0.55);
+  border-radius: 16px;
+  background: #f7f2f2;
+}
+
+.kpiCard {
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.kpiCard span {
+  color: #50453e;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kpiCard strong {
+  font-family: "Manrope", sans-serif;
+  font-size: 1.2rem;
+  color: #553722;
+}
+
+.kpiCard small {
+  display: block;
+  color: #50453e;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.summaryCard {
+  padding: 14px;
+  background: #f7f2f2;
+  display: grid;
+  gap: 10px;
+}
+
+.summaryCard h3 {
+  margin: 0;
+  color: #553722;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.summaryRows,
+.totalRows {
+  display: grid;
+  gap: 8px;
+}
+
+.summaryRow,
+.totalRows div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.summaryRow {
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(212, 195, 186, 0.4);
+}
+
+.summaryRow span {
+  color: #1c1b1b;
+  font-size: 0.9rem;
+}
+
+.summaryRow strong,
+.totalRows strong {
+  font-family: "Manrope", sans-serif;
+  color: #553722;
+}
+
+.totalRows span {
+  color: #50453e;
+  font-size: 0.85rem;
+}
+
+.totalRowMain span,
+.totalRowMain strong {
+  color: #1c1b1b;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.dashboardButton {
+  border: 0;
+  border-radius: 999px;
+  min-height: 56px;
+  background: linear-gradient(145deg, #553722, #6f4e37);
+  color: #ffffff;
+  font-family: "Manrope", sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: #553722;
+  font-family: "Manrope", sans-serif;
+  font-weight: 700;
+}
+
+.errorCard {
+  min-height: calc(100vh - 80px);
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.errorCard h1 {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  color: #553722;
+}
+
+.errorCard p {
+  margin: 0;
+  color: #50453e;
+}
+
+.errorCard button {
+  border: 0;
+  border-radius: 999px;
+  min-height: 48px;
+  background: #1c1b1b;
+  color: #ffffff;
+  font-family: "Manrope", sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
