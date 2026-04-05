@@ -156,7 +156,7 @@ export default function Dashboard() {
           <div className={styles.panelHeader}>
             <div>
               <h3 className={styles.panelTitle}>Revenue Trends</h3>
-              <p className={styles.panelSub}>Performance overview from Supabase order history.</p>
+              <p className={styles.panelSub}>Performance overview from Likhang Hiraya order history.</p>
             </div>
 
             <div className={styles.segmentedControl} role="tablist" aria-label="Revenue trend range">
@@ -193,7 +193,7 @@ export default function Dashboard() {
           <div className={styles.panelHeader}>
             <div>
               <h3 className={styles.panelTitle}>Recent Orders</h3>
-              <p className={styles.panelSub}>Latest customer activity from Supabase orders.</p>
+              <p className={styles.panelSub}>Latest customer activity from Likhang Hiraya orders.</p>
             </div>
             <button type="button" className={styles.viewAllButton} onClick={() => loadDashboard(false)}>
               Refresh List
