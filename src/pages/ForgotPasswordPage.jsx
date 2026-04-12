@@ -8,7 +8,7 @@ export default function ForgotPasswordPage() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    navigate("/verify-otp", { state: { email } });
+    navigate("/verify-otp", { state: { email, purpose: "password-reset" } });
   }
 
   return (

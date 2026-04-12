@@ -30,7 +30,10 @@ export default function CartPage() {
         </header>
 
         <section>
-          <h1 className="cart-title">Your Order:</h1>
+          <div className="cart-title-row">
+            <h1 className="cart-title">Your Order:</h1>
+            <Link className="history-link" to="/orders/history">Past Orders</Link>
+          </div>
         </section>
 
         <section className="items" id="order-items-list">

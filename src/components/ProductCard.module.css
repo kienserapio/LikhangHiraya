@@ -15,6 +15,7 @@
   padding: 0;
   text-align: left;
   cursor: pointer;
+  width: 100%;
 }
 
 .imageWrap {
@@ -31,14 +32,24 @@
   object-fit: cover;
 }
 
-.badge {
+.unavailableOverlay {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(47, 39, 34, 0.9);
-  color: var(--color-white);
-  font-size: 0.72rem;
-  padding: 4px 8px;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(52, 52, 52, 0.64);
+  border-radius: 22px;
+  pointer-events: none;
+}
+
+.unavailableText {
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: rgba(18, 18, 18, 0.68);
+  padding: 6px 12px;
   border-radius: 999px;
 }
 
@@ -59,10 +70,67 @@
   font-size: 1.1rem;
 }
 
-.price {
+.stockLabel {
   margin: 0;
+  color: #85786f;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stockLabelWarn {
+  color: #c96a10;
+  font-weight: 700;
+}
+
+.price {
+  margin: 4px 0 0;
   color: var(--color-primary-dark);
   font-weight: 700;
+}
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.favoriteButton {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #d7c7bc;
+  border-radius: 14px;
+  display: inline-grid;
+  place-items: center;
+  background: #ffffff;
+  color: #6f4e37;
+  cursor: pointer;
+  transition: transform 0.16s ease, color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.favoriteButton svg {
+  display: block;
+}
+
+.favoriteButtonActive {
+  color: #e53935;
+  border-color: #ef9a9a;
+  background: #fff5f5;
+}
+
+.favoriteButtonPulse {
+  animation: heart-pop 180ms ease;
+}
+
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .addButton {
@@ -73,13 +141,15 @@
   min-height: 44px;
   font-weight: 700;
   cursor: pointer;
+  flex: 1;
 }
 
-.addButton:disabled {
+.addButton:disabled,
+.favoriteButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 .outOfStock {
-  filter: grayscale(0.3);
+  filter: grayscale(0.35);
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   fetchInventoryProducts,
   quickEditProduct,
@@ -39,6 +39,7 @@ function buildSku(product) {
 
 export default function Inventory() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -52,6 +53,8 @@ export default function Inventory() {
 
   const [restockState, setRestockState] = useState(null);
   const [isRestocking, setIsRestocking] = useState(false);
+
+  const lowStockOnly = searchParams.get("stock") === "low";
 
   const loadProducts = useCallback(async (background = false) => {
     if (!background) {
@@ -111,6 +114,10 @@ export default function Inventory() {
         return false;
       }
 
+      if (lowStockOnly && Number(product.stockQuantity || 0) > 5) {
+        return false;
+      }
+
       if (!normalizedSearch) {
         return true;
       }
@@ -119,13 +126,13 @@ export default function Inventory() {
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(normalizedSearch));
     });
-  }, [categoryFilter, products, searchText]);
+  }, [categoryFilter, lowStockOnly, products, searchText]);
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ROWS_PER_PAGE));
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [categoryFilter, searchText]);
+  }, [categoryFilter, lowStockOnly, searchText]);
 
   useEffect(() => {
     setCurrentPage((previous) => Math.min(previous, totalPages));
@@ -144,7 +151,8 @@ export default function Inventory() {
       id: product.id,
       name: product.name,
       pricePhp: String(product.pricePhp),
-      stockQuantity: String(product.stockQuantity),
+      availability: product.status === "Available" ? "SHOW" : "HIDE",
+      currentStock: Number(product.stockQuantity || 0),
     });
   }
 
@@ -160,7 +168,8 @@ export default function Inventory() {
     try {
       const updated = await quickEditProduct(quickEditState.id, {
         pricePhp: Number(quickEditState.pricePhp),
-        stockQuantity: Number(quickEditState.stockQuantity),
+        availability: quickEditState.availability,
+        currentStock: Number(quickEditState.currentStock || 0),
       });
       setProducts((current) => upsertProduct(current, updated));
       setQuickEditState(null);
@@ -203,6 +212,12 @@ export default function Inventory() {
     } finally {
       setIsRestocking(false);
     }
+  }
+
+  function clearLowStockFilter() {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("stock");
+    setSearchParams(nextParams);
   }
 
   return (
@@ -268,6 +283,12 @@ export default function Inventory() {
               );
             })}
           </div>
+
+          {lowStockOnly ? (
+            <button type="button" className={styles.lowStockFilterBadge} onClick={clearLowStockFilter}>
+              Low stock filter active (≤ 5) · Clear
+            </button>
+          ) : null}
         </div>
 
         <div className={styles.tableWrap}>
@@ -397,15 +418,15 @@ export default function Inventory() {
               </div>
 
               <div className={styles.modalField}>
-                <label htmlFor="quick-edit-stock">Stock Quantity</label>
-                <input
-                  id="quick-edit-stock"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={quickEditState.stockQuantity}
-                  onChange={(event) => setQuickEditState((prev) => ({ ...prev, stockQuantity: event.target.value }))}
-                />
+                <label htmlFor="quick-edit-availability">Availability (Show/Hide)</label>
+                <select
+                  id="quick-edit-availability"
+                  value={quickEditState.availability}
+                  onChange={(event) => setQuickEditState((prev) => ({ ...prev, availability: event.target.value }))}
+                >
+                  <option value="SHOW">Show</option>
+                  <option value="HIDE">Hide</option>
+                </select>
               </div>
 
               <div className={styles.modalActions}>

@@ -99,7 +99,10 @@ export async function apiRequest(path, options = {}) {
       const payload = responseText ? safeJsonParse(responseText, responseText) : null;
 
       if (!response.ok) {
-        throw new Error(toErrorMessage(response, payload, responseText));
+        const requestError = new Error(toErrorMessage(response, payload, responseText));
+        requestError.status = response.status;
+        requestError.path = path;
+        throw requestError;
       }
 
       return payload === null ? {} : payload;
@@ -117,6 +120,50 @@ export async function apiRequest(path, options = {}) {
   }
 
   throw new Error("Could not connect to the server.");
+}
+
+async function resolveIdentifierFromSupabase(identifier) {
+  const normalizedIdentifier = String(identifier || "").trim();
+
+  if (!normalizedIdentifier) {
+    throw new Error("Identifier is required.");
+  }
+
+  if (normalizedIdentifier.includes("@")) {
+    return { email: normalizedIdentifier.toLowerCase() };
+  }
+
+  const usersResult = await supabase
+    .from("users")
+    .select("email")
+    .ilike("username", normalizedIdentifier)
+    .limit(1)
+    .maybeSingle();
+
+  if (!usersResult.error && usersResult.data?.email) {
+    return { email: String(usersResult.data.email).trim().toLowerCase() };
+  }
+
+  const profilesResult = await supabase
+    .from("profiles")
+    .select("email")
+    .ilike("username", normalizedIdentifier)
+    .limit(1)
+    .maybeSingle();
+
+  if (!profilesResult.error && profilesResult.data?.email) {
+    return { email: String(profilesResult.data.email).trim().toLowerCase() };
+  }
+
+  if (usersResult.error && usersResult.error.code !== "PGRST116") {
+    throw new Error(`Unable to resolve account: ${usersResult.error.message}`);
+  }
+
+  if (profilesResult.error && profilesResult.error.code !== "PGRST116") {
+    throw new Error(`Unable to resolve account: ${profilesResult.error.message}`);
+  }
+
+  throw new Error("Account not found.");
 }
 
 function mapProductRow(row) {
@@ -316,6 +363,30 @@ export const authApi = {
   },
 };
 
+export const usersApi = {
+  resolveIdentifier: async (identifier) => {
+    const normalizedIdentifier = String(identifier || "").trim();
+    const endpoint = `/api/users/resolve-identifier/${encodeURIComponent(normalizedIdentifier)}`;
+
+    try {
+      return await apiRequest(endpoint);
+    } catch (error) {
+      const message = String(error?.message || "").trim().toLowerCase();
+      const status = Number(error?.status || 0);
+
+      // If the deployed backend does not yet expose this endpoint, fall back to Supabase.
+      const endpointMissing = status === 404 && message === "not found";
+      const backendOffline = message.includes("could not connect to the server");
+
+      if (!endpointMissing && !backendOffline) {
+        throw error;
+      }
+
+      return resolveIdentifierFromSupabase(normalizedIdentifier);
+    }
+  },
+};
+
 export const productApi = {
   list: () => listProductsFromSupabase(),
 };
@@ -323,6 +394,7 @@ export const productApi = {
 export const orderApi = {
   placeOrder: (payload) => apiRequest("/api/orders", { method: "POST", body: payload }),
   listMine: (scope = "active") => apiRequest("/api/orders/mine", { query: { scope } }),
+  listHistory: () => apiRequest("/api/orders/history"),
   clearMineActive: () => apiRequest("/api/orders/mine/active", { method: "DELETE" }),
   getById: (orderId) => apiRequest(`/api/orders/${encodeURIComponent(orderId)}`),
   decline: (orderId) =>

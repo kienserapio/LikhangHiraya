@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   completeRiderDelivery,
   confirmArrival,
-  confirmPickup,
   fetchRiderDashboard,
   startTransit,
   subscribeToRiderOrders,
@@ -181,7 +180,12 @@ export default function RiderActiveDeliveryPage() {
             {activeOrder.status === "CONFIRMED" || activeOrder.status === "PREPARING" || activeOrder.status === "RIDER_ASSIGNED" ? (
               <>
                 <button className={styles.secondary} onClick={() => window.open(mapsLink("Likhang Hiraya Cafe, Manila"), "_blank")}>Get Directions to Cafe</button>
-                <button className={styles.primary} onClick={() => confirmPickup(activeOrder.orderId).then(refresh)}>Confirm Pickup</button>
+                <div className={styles.handoverPendingCard} role="status" aria-live="polite">
+                  <p className={styles.handoverPendingTitle}>Handover Pending</p>
+                  <p className={styles.handoverPendingText}>
+                    Please present your Order ID to the barista. Waiting for shop confirmation...
+                  </p>
+                </div>
               </>
             ) : null}
 

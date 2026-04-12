@@ -1,0 +1,181 @@
+.page {
+  display: grid;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+  color: #553722;
+  font-size: clamp(1.3rem, 2.3vw, 1.8rem);
+  font-weight: 800;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: #7f736c;
+  font-size: 0.9rem;
+}
+
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metricsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.metricCard {
+  border: 1px solid #eadfd2;
+  border-radius: 14px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.metricCard p {
+  margin: 0;
+  color: #7f736c;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.metricCard strong {
+  margin-top: 8px;
+  display: block;
+  color: #553722;
+  font-size: 1.3rem;
+}
+
+.controlsPanel {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+  border: 1px solid #eadfd2;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.controlField {
+  display: grid;
+  gap: 6px;
+}
+
+.controlField label {
+  color: #7f736c;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.controlField select {
+  border: 1px solid #d7c6bb;
+  border-radius: 10px;
+  min-width: 170px;
+  background: #ffffff;
+  color: #553722;
+  font: inherit;
+  padding: 9px 11px;
+}
+
+.groupList {
+  display: grid;
+  gap: 12px;
+}
+
+.groupCard {
+  border: 1px solid #eadfd2;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 12px;
+  box-shadow: 0 10px 20px -22px rgba(23, 21, 19, 0.48);
+}
+
+.groupHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.groupHeader h3 {
+  margin: 0;
+  color: #553722;
+  font-size: 1rem;
+}
+
+.groupHeader p {
+  margin: 4px 0 0;
+  color: #7f736c;
+  font-size: 0.82rem;
+}
+
+.groupHeader strong {
+  color: #553722;
+  font-size: 1rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: #faf6f3;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid #efe6df;
+  text-align: left;
+  padding: 10px 9px;
+  font-size: 0.86rem;
+}
+
+.table th {
+  color: #82746d;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.alignRight {
+  text-align: right !important;
+}
+
+.emptyState {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .controlField,
+  .controlField select {
+    width: 100%;
+  }
+}

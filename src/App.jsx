@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -14,6 +15,7 @@ import SuccessPage from "./pages/customer/SuccessPage";
 import ProfilePage from "./pages/customer/ProfilePage";
 import CreateOrderPage from "./pages/customer/CreateOrderPage";
 import OrderConfirmationPage from "./pages/customer/OrderConfirmationPage";
+import PastOrdersPage from "./pages/customer/PastOrdersPage";
 import SettingsPage from "./pages/customer/SettingsPage";
 import CustomerDeliverySuccessPage from "./pages/customer/CustomerDeliverySuccessPage";
 import GcashLoginPage from "./pages/customer/GcashLoginPage";
@@ -32,9 +34,17 @@ import AdminDashboardPage from "./pages/admin/Dashboard";
 import AdminInventoryPage from "./pages/admin/Inventory";
 import AdminInventoryAddPage from "./pages/admin/InventoryAddProduct";
 import AdminAnalyticsPage from "./pages/admin/Analytics";
+import AdminOrdersHistoryPage from "./pages/admin/OrdersHistory";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { useAuthStore } from "./store/authStore";
 
 export default function App() {
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
+
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
@@ -53,6 +63,7 @@ export default function App() {
       <Route path="/profile" element={<ProtectedRoute requireMfa allowedRoles={["CUSTOMER"]}><ProfilePage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute requireMfa allowedRoles={["CUSTOMER"]}><SettingsPage /></ProtectedRoute>} />
       <Route path="/create-order" element={<ProtectedRoute requireMfa allowedRoles={["CUSTOMER"]}><CreateOrderPage /></ProtectedRoute>} />
+      <Route path="/orders/history" element={<ProtectedRoute requireMfa allowedRoles={["CUSTOMER"]}><PastOrdersPage /></ProtectedRoute>} />
       <Route path="/payment/gcash/login" element={<ProtectedRoute requireMfa allowedRoles={["CUSTOMER"]}><GcashLoginPage /></ProtectedRoute>} />
       <Route path="/payment/gcash/pin" element={<ProtectedRoute requireMfa allowedRoles={["CUSTOMER"]}><GcashPinPage /></ProtectedRoute>} />
       <Route path="/payment/gcash/confirm" element={<ProtectedRoute requireMfa allowedRoles={["CUSTOMER"]}><GcashConfirmPaymentPage /></ProtectedRoute>} />
@@ -77,6 +88,7 @@ export default function App() {
         <Route path="inventory" element={<AdminInventoryPage />} />
         <Route path="inventory/new" element={<AdminInventoryAddPage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />
+        <Route path="orders" element={<AdminOrdersHistoryPage />} />
       </Route>
     </Routes>
   );

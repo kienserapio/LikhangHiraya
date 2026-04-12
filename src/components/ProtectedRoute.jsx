@@ -5,8 +5,13 @@ export default function ProtectedRoute({ children, requireMfa = false, allowedRo
   const location = useLocation();
   const token = useAuthStore((state) => state.token);
   const mfaVerified = useAuthStore((state) => state.mfaVerified);
+  const otpContext = useAuthStore((state) => state.otpContext);
   const user = useAuthStore((state) => state.user);
   const normalizedRole = String(user?.role || "").toUpperCase();
+
+  if (!token && otpContext?.email) {
+    return <Navigate to="/verify-otp" replace state={{ ...otpContext, from: location.pathname }} />;
+  }
 
   if (!token) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
@@ -17,7 +22,10 @@ export default function ProtectedRoute({ children, requireMfa = false, allowedRo
   }
 
   if (requireMfa && !mfaVerified) {
-    return <Navigate to="/mfa" replace />;
+    if (otpContext?.email) {
+      return <Navigate to="/verify-otp" replace state={{ ...otpContext, from: location.pathname }} />;
+    }
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(normalizedRole)) {

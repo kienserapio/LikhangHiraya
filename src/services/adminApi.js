@@ -169,7 +169,7 @@ export async function fetchAdminDashboardSnapshot(range = "WEEK") {
       supabase.from("orders").select("total").gte("created_at", todayIso).eq("status", "DELIVERED"),
       supabase.from("users").select("id", { head: true, count: "exact" }).eq("role", "RIDER").eq("is_online", true),
       supabase.from("orders").select("id", { head: true, count: "exact" }).eq("status", "PENDING"),
-      supabase.from("orders").select("id, user_id, status, total, created_at").order("created_at", { ascending: false }).limit(10),
+      supabase.from("orders").select("id, user_id, rider_id, status, total, created_at").order("created_at", { ascending: false }).limit(20),
       supabase
         .from("orders")
         .select("created_at, total")
@@ -186,12 +186,14 @@ export async function fetchAdminDashboardSnapshot(range = "WEEK") {
 
   const recentOrders = recentOrdersRes.data || [];
   const customerIds = Array.from(new Set(recentOrders.map((order) => order.user_id).filter(Boolean)));
+  const riderIds = Array.from(new Set(recentOrders.map((order) => order.rider_id).filter(Boolean)));
+  const relatedUserIds = Array.from(new Set([...customerIds, ...riderIds]));
 
-  let customerMap = new Map();
-  if (customerIds.length > 0) {
-    const usersRes = await supabase.from("users").select("id, full_name, username").in("id", customerIds);
+  let usersMap = new Map();
+  if (relatedUserIds.length > 0) {
+    const usersRes = await supabase.from("users").select("id, full_name, username").in("id", relatedUserIds);
     assertNoError(usersRes.error, "Unable to load customer profiles");
-    customerMap = new Map((usersRes.data || []).map((user) => [String(user.id), user]));
+    usersMap = new Map((usersRes.data || []).map((user) => [String(user.id), user]));
   }
 
   const revenueByBucket = new Map(revenueConfig.buckets.map((bucket) => [bucket.key, 0]));
@@ -213,11 +215,15 @@ export async function fetchAdminDashboardSnapshot(range = "WEEK") {
       pendingOrders: pendingOrdersCountRes.count || 0,
     },
     recentOrders: recentOrders.map((order) => {
-      const customer = customerMap.get(String(order.user_id));
+      const customer = usersMap.get(String(order.user_id));
+      const rider = usersMap.get(String(order.rider_id));
       return {
         id: String(order.id),
         customerName: customer?.full_name || customer?.username || "Unknown Customer",
+        riderId: order.rider_id ? String(order.rider_id) : "",
+        riderName: rider?.full_name || rider?.username || "",
         status: order.status || "PENDING",
+        createdAt: order.created_at || "",
         total: toNumber(order.total),
       };
     }),
@@ -228,17 +234,73 @@ export async function fetchAdminDashboardSnapshot(range = "WEEK") {
   };
 }
 
+export async function fetchAdminOrdersHistory() {
+  const ordersRes = await supabase
+    .from("orders")
+    .select("id, user_id, rider_id, status, subtotal, delivery_fee, total, created_at, accepted_at, picked_up_at, arrived_at, delivered_at")
+    .order("created_at", { ascending: false });
+
+  assertNoError(ordersRes.error, "Unable to load orders history");
+
+  const orders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+  if (orders.length === 0) {
+    return [];
+  }
+
+  const customerIds = Array.from(new Set(orders.map((order) => order.user_id).filter(Boolean)));
+  const riderIds = Array.from(new Set(orders.map((order) => order.rider_id).filter(Boolean)));
+  const relatedUserIds = Array.from(new Set([...customerIds, ...riderIds]));
+
+  let usersMap = new Map();
+  if (relatedUserIds.length > 0) {
+    const usersRes = await supabase.from("users").select("id, full_name, username, role").in("id", relatedUserIds);
+    assertNoError(usersRes.error, "Unable to load order-related users");
+    usersMap = new Map((usersRes.data || []).map((user) => [String(user.id), user]));
+  }
+
+  return orders.map((order) => {
+    const customer = usersMap.get(String(order.user_id));
+    const rider = usersMap.get(String(order.rider_id));
+
+    return {
+      id: String(order.id),
+      status: String(order.status || "PENDING").toUpperCase(),
+      customerName: customer?.full_name || customer?.username || "Unknown Customer",
+      riderName: rider?.full_name || rider?.username || "Unassigned",
+      riderRole: String(rider?.role || "").toUpperCase(),
+      subtotal: toNumber(order.subtotal),
+      deliveryFee: toNumber(order.delivery_fee),
+      total: toNumber(order.total),
+      createdAt: order.created_at || "",
+      acceptedAt: order.accepted_at || "",
+      pickedUpAt: order.picked_up_at || "",
+      arrivedAt: order.arrived_at || "",
+      deliveredAt: order.delivered_at || "",
+    };
+  });
+}
+
 export async function fetchInventoryProducts() {
   const productsRes = await supabase.from("products").select("*").order("created_at", { ascending: false });
   assertNoError(productsRes.error, "Unable to load products");
   return (productsRes.data || []).map(mapProductRow);
 }
 
-export async function quickEditProduct(productId, { pricePhp, stockQuantity }) {
+export async function quickEditProduct(productId, { pricePhp, availability, currentStock }) {
   const nextPayload = {
     price_php: Number(pricePhp),
-    stock: Number(stockQuantity),
   };
+
+  const normalizedAvailability = String(availability || "").trim().toUpperCase();
+  const normalizedCurrentStock = Number(currentStock || 0);
+
+  if (normalizedAvailability === "HIDE") {
+    nextPayload.stock = 0;
+  }
+
+  if (normalizedAvailability === "SHOW" && normalizedCurrentStock <= 0) {
+    throw new Error("Cannot set availability to Show while stock is 0. Use Restock to add stock first.");
+  }
 
   const updateRes = await supabase.from("products").update(nextPayload).eq("id", productId).select("*").maybeSingle();
   assertNoError(updateRes.error, "Unable to update product");

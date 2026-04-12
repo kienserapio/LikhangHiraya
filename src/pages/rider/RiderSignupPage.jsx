@@ -67,7 +67,7 @@ export default function RiderSignupPage() {
     }
 
     try {
-      await registerRider({
+      const otpContext = await registerRider({
         fullName: form.fullName,
         email: form.email,
         phone: form.phone,
@@ -82,7 +82,13 @@ export default function RiderSignupPage() {
         gcashNumber: form.gcashNumber,
         workingShift: form.workingShift,
       });
-      navigate("/login");
+      navigate("/verify-otp", {
+        state: otpContext || {
+          email: form.email,
+          otpType: "signup",
+          identifier: form.username,
+        },
+      });
     } catch (error) {
       setErrors({ username: [error.message || "Unable to create rider account"] });
     }

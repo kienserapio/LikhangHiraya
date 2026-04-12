@@ -57,7 +57,7 @@
 
 .kpiGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
 }
 
@@ -69,6 +69,23 @@
   display: grid;
   gap: 8px;
   box-shadow: 0 10px 24px -22px rgba(28, 27, 27, 0.35);
+}
+
+.kpiCardButton {
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.2s ease;
+}
+
+.kpiCardButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px -18px rgba(113, 29, 29, 0.45);
+}
+
+.kpiCardAlert {
+  background: #fff1ef;
+  border-color: #efb3a9;
 }
 
 .kpiIconBubble {
@@ -100,6 +117,13 @@
   line-height: 1.05;
 }
 
+.kpiHint {
+  margin: 0;
+  color: #8f3027;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
 .mainStack {
   display: grid;
   gap: 16px;
@@ -120,6 +144,14 @@
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 12px;
+}
+
+.panelActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .panelTitle {
@@ -220,6 +252,33 @@
   background: #fcfaf8;
 }
 
+.handoverButton {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: #8a1d1d;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+
+.handoverButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.actionHint {
+  color: #8a7d75;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.alignCenter {
+  text-align: center !important;
+}
+
 .alignRight {
   text-align: right !important;
 }
@@ -228,6 +287,26 @@
   margin: 0;
   color: #6b7280;
   font-size: 0.88rem;
+}
+
+.modalCopy {
+  margin: 10px 0 0;
+  color: #5d5149;
+  font-size: 0.9rem;
+}
+
+.modalMeta {
+  margin: 4px 0 0;
+  color: #8a7d75;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.modalActions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .systemStatus {
@@ -288,6 +367,11 @@
   .panelHeader {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .panelActions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .segmentedControl {

@@ -125,6 +125,18 @@
   flex-wrap: wrap;
 }
 
+.lowStockFilterBadge {
+  border: 1px solid #e6958b;
+  border-radius: 999px;
+  background: #ffe4df;
+  color: #8a1d1d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
 .categoryPill {
   border: 1px solid #e2d4cb;
   border-radius: 999px;
@@ -177,8 +189,13 @@
   background: #fcfaf8;
 }
 
-.rowLowStock {
-  background: #fff7f6;
+.rowLowStock td {
+  background: #ffd8d1;
+  border-bottom-color: #efb2a7;
+}
+
+.rowLowStock:hover td {
+  background: #ffcfc6;
 }
 
 .productImageWrap {
@@ -375,6 +392,14 @@
 }
 
 .modalField input {
+  border: 1px solid #d9c8bc;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px;
+  font: inherit;
+}
+
+.modalField select {
   border: 1px solid #d9c8bc;
   border-radius: 10px;
   background: #ffffff;

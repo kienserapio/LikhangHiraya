@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CartesianGrid,
   Line,
@@ -8,7 +9,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { fetchAdminDashboardSnapshot } from "../../services/adminApi";
+import { orderApi } from "../../services/api";
+import { fetchAdminDashboardSnapshot, fetchLowStockProducts } from "../../services/adminApi";
 import { supabase } from "../../services/supabaseClient";
 import adminStyles from "./Admin.module.css";
 import styles from "./Dashboard.module.css";
@@ -19,6 +21,24 @@ function toPeso(value) {
     currency: "PHP",
     maximumFractionDigits: 0,
   }).format(Number(value || 0));
+}
+
+function formatDateTime(value) {
+  if (!value) {
+    return "-";
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "short",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(parsed);
 }
 
 function statusClass(status) {
@@ -54,10 +74,14 @@ const DASHBOARD_RANGE_OPTIONS = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [dashboard, setDashboard] = useState(INITIAL_DASHBOARD);
+  const [lowStockCount, setLowStockCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [timeRange, setTimeRange] = useState("WEEK");
+  const [handoverOrder, setHandoverOrder] = useState(null);
+  const [isConfirmingHandover, setIsConfirmingHandover] = useState(false);
 
   const loadDashboard = useCallback(async (background = false) => {
     if (!background) {
@@ -65,8 +89,12 @@ export default function Dashboard() {
     }
 
     try {
-      const next = await fetchAdminDashboardSnapshot(timeRange);
+      const [next, lowStockProducts] = await Promise.all([
+        fetchAdminDashboardSnapshot(timeRange),
+        fetchLowStockProducts(5),
+      ]);
       setDashboard(next);
+      setLowStockCount(lowStockProducts.length);
       setError("");
     } catch (loadError) {
       setError(loadError.message || "Unable to load dashboard metrics.");
@@ -103,6 +131,45 @@ export default function Dashboard() {
     day: "2-digit",
     year: "numeric",
   }).format(new Date());
+
+  const activeOrders = useMemo(() => {
+    return (dashboard.recentOrders || []).filter((order) => {
+      const normalized = String(order?.status || "").toUpperCase();
+      return normalized !== "DELIVERED" && normalized !== "CANCELLED";
+    });
+  }, [dashboard.recentOrders]);
+
+  const recentOrders = useMemo(() => {
+    return (dashboard.recentOrders || []).slice(0, 10);
+  }, [dashboard.recentOrders]);
+
+  function isHandoverEligibleStatus(order) {
+    const normalized = String(order?.status || "").toUpperCase();
+    return normalized === "PREPARING" || normalized === "RIDER_ASSIGNED";
+  }
+
+  function canConfirmHandover(order) {
+    return isHandoverEligibleStatus(order) && Boolean(order?.riderId);
+  }
+
+  async function handleConfirmHandover() {
+    if (!handoverOrder?.id) {
+      return;
+    }
+
+    setIsConfirmingHandover(true);
+    setError("");
+
+    try {
+      await orderApi.updateStatus(handoverOrder.id, "PICKED_UP");
+      await loadDashboard(true);
+      setHandoverOrder(null);
+    } catch (submitError) {
+      setError(submitError.message || "Unable to confirm handover.");
+    } finally {
+      setIsConfirmingHandover(false);
+    }
+  }
 
   return (
     <section className={styles.dashboardPage}>
@@ -149,6 +216,18 @@ export default function Dashboard() {
           <p className={styles.kpiLabel}>Pending Orders</p>
           <p className={styles.kpiValue}>{dashboard.kpis.pendingOrders}</p>
         </article>
+
+        <button
+          type="button"
+          className={`${styles.kpiCard} ${styles.kpiCardButton} ${styles.kpiCardAlert}`}
+          onClick={() => navigate("/admin/inventory?stock=low")}
+          aria-label="Open low stock alerts in inventory"
+        >
+          <div className={styles.kpiIconBubble} aria-hidden="true">⚠</div>
+          <p className={styles.kpiLabel}>Low Stock Alerts</p>
+          <p className={styles.kpiValue}>{lowStockCount}</p>
+          <p className={styles.kpiHint}>View low-stock items</p>
+        </button>
       </div>
 
       <div className={styles.mainStack}>
@@ -192,12 +271,15 @@ export default function Dashboard() {
         <section className={styles.tablePanel}>
           <div className={styles.panelHeader}>
             <div>
-              <h3 className={styles.panelTitle}>Recent Orders</h3>
-              <p className={styles.panelSub}>Latest customer activity from Likhang Hiraya orders.</p>
+              <h3 className={styles.panelTitle}>Active Orders</h3>
+              <p className={styles.panelSub}>Track active orders and confirm rider handover from the shop.</p>
             </div>
-            <button type="button" className={styles.viewAllButton} onClick={() => loadDashboard(false)}>
-              Refresh List
-            </button>
+            <div className={styles.panelActions}>
+              <button type="button" className={styles.viewAllButton} onClick={() => loadDashboard(false)}>
+                Refresh List
+              </button>
+              <button type="button" className={styles.viewAllButton} onClick={() => navigate("/admin/orders")}>View Full History</button>
+            </div>
           </div>
 
           <div className={styles.tableWrap}>
@@ -206,25 +288,96 @@ export default function Dashboard() {
                 <tr>
                   <th>ID</th>
                   <th>Customer</th>
+                  <th>Rider</th>
                   <th>Status</th>
+                  <th className={styles.alignRight}>Total</th>
+                  <th className={styles.alignCenter}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={6}>
+                      <p className={styles.emptyState}>{isLoading ? "Loading active orders..." : "No active orders found."}</p>
+                    </td>
+                  </tr>
+                ) : (
+                  activeOrders.map((order) => (
+                    <tr key={order.id}>
+                      <td>#{order.id.slice(0, 8)}</td>
+                      <td>{order.customerName}</td>
+                      <td>{order.riderName || "Unassigned"}</td>
+                      <td>
+                        <span className={statusClass(order.status)}>{order.status}</span>
+                      </td>
+                      <td className={styles.alignRight}>{toPeso(order.total)}</td>
+                      <td className={styles.alignCenter}>
+                        {isHandoverEligibleStatus(order) ? (
+                          <button
+                            type="button"
+                            className={styles.handoverButton}
+                            disabled={!canConfirmHandover(order)}
+                            onClick={() => {
+                              if (canConfirmHandover(order)) {
+                                setHandoverOrder(order);
+                              }
+                            }}
+                          >
+                            Confirm Handover
+                          </button>
+                        ) : (
+                          <span className={styles.actionHint}>Await rider</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className={styles.tablePanel}>
+          <div className={styles.panelHeader}>
+            <div>
+              <h3 className={styles.panelTitle}>Recent Orders</h3>
+              <p className={styles.panelSub}>Latest order activity, including delivered and cancelled orders.</p>
+            </div>
+            <div className={styles.panelActions}>
+              <button type="button" className={styles.viewAllButton} onClick={() => loadDashboard(false)}>Refresh</button>
+              <button type="button" className={styles.viewAllButton} onClick={() => navigate("/admin/orders")}>Open History</button>
+            </div>
+          </div>
+
+          <div className={styles.tableWrap}>
+            <table className={styles.recentOrdersTable}>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Customer</th>
+                  <th>Rider</th>
+                  <th>Status</th>
+                  <th>Date</th>
                   <th className={styles.alignRight}>Total</th>
                 </tr>
               </thead>
               <tbody>
-                {dashboard.recentOrders.length === 0 ? (
+                {recentOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={4}>
-                      <p className={styles.emptyState}>{isLoading ? "Loading recent orders..." : "No orders found."}</p>
+                    <td colSpan={6}>
+                      <p className={styles.emptyState}>{isLoading ? "Loading recent orders..." : "No recent orders found."}</p>
                     </td>
                   </tr>
                 ) : (
-                  dashboard.recentOrders.map((order) => (
-                    <tr key={order.id}>
+                  recentOrders.map((order) => (
+                    <tr key={`recent-${order.id}`}>
                       <td>#{order.id.slice(0, 8)}</td>
                       <td>{order.customerName}</td>
+                      <td>{order.riderName || "Unassigned"}</td>
                       <td>
                         <span className={statusClass(order.status)}>{order.status}</span>
                       </td>
+                      <td>{formatDateTime(order.createdAt)}</td>
                       <td className={styles.alignRight}>{toPeso(order.total)}</td>
                     </tr>
                   ))
@@ -234,6 +387,36 @@ export default function Dashboard() {
           </div>
         </section>
       </div>
+
+      {handoverOrder ? (
+        <div className={adminStyles.modalBackdrop}>
+          <div className={adminStyles.modalCard}>
+            <h4 className={adminStyles.modalTitle}>Confirm Handover</h4>
+            <p className={styles.modalCopy}>
+              Is Rider <strong>{handoverOrder.riderName || "Unassigned"}</strong> ready to take this order?
+            </p>
+            <p className={styles.modalMeta}>Order #{handoverOrder.id.slice(0, 8)}</p>
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.handoverButton}
+                disabled={isConfirmingHandover}
+                onClick={handleConfirmHandover}
+              >
+                {isConfirmingHandover ? "Confirming..." : "Yes, Confirm Handover"}
+              </button>
+              <button
+                type="button"
+                className={adminStyles.buttonSecondary}
+                disabled={isConfirmingHandover}
+                onClick={() => setHandoverOrder(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className={styles.systemStatus}>
         <p className={styles.systemStatusLabel}>System Status</p>

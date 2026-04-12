@@ -71,7 +71,13 @@ export default function Register() {
         password: form.password,
         address: form.address,
       });
-      navigate("/login");
+      navigate("/verify-otp", {
+        state: {
+          email: form.email,
+          otpType: "signup",
+          identifier: form.username,
+        },
+      });
     } catch (error) {
       setErrors({ username: [error.message || "Unable to create account"] });
     }
@@ -82,7 +88,7 @@ export default function Register() {
       <main className={styles.container}>
         <header className={styles.header}>
           <h1>Welcome to Likhang Hiraya</h1>
-          <p>Create your account to order your coffee.</p>
+          <p>Create your account, then verify using the Gmail OTP code.</p>
         </header>
 
         <form className={styles.form} onSubmit={handleSubmit}>

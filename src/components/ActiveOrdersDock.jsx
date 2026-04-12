@@ -125,14 +125,21 @@ export default function ActiveOrdersDock() {
   }, [navigate]);
 
   useEffect(() => {
+    let isMounted = true;
     let cleanup = () => {};
 
     (async () => {
       const ids = await loadOrders();
+      if (!isMounted) {
+        return;
+      }
       cleanup = subscribeToActiveOrders(ids, loadOrders, handleDeliveredOrder);
     })();
 
-    return () => cleanup();
+    return () => {
+      isMounted = false;
+      cleanup();
+    };
   }, [handleDeliveredOrder, loadOrders]);
 
   const activeCount = useMemo(() => orderIds.length || orders.length, [orderIds.length, orders.length]);

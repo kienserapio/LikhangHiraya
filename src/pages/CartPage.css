@@ -27,6 +27,30 @@
   margin-bottom: 2rem;
 }
 
+.cart-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.cart-title-row .cart-title {
+  margin-bottom: 0;
+}
+
+.history-link {
+  border: 1px solid #d6c8bc;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #553722;
+  background: #fff9f4;
+  white-space: nowrap;
+}
+
 .items {
   display: grid;
   gap: 1.5rem;
