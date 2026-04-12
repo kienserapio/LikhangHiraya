@@ -103,7 +103,11 @@ export default function OrderStatusDetailsPage() {
           {timeline.map((item) => (
             <div key={item.title} className="timeline-item" data-purpose="timeline-item">
               <div className="icon-wrap">{item.icon}</div>
-              <div className={`dot ${item.active ? "active" : ""}`} />
+              <div
+                className={`dot ${item.active ? "active" : ""} ${
+                  item.title === "Order Confirmed" || item.title === "Order Processed" ? "checked" : ""
+                }`}
+              />
               <div className="status-card">
                 <div className="status-top">
                   <div>

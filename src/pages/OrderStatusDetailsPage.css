@@ -76,6 +76,24 @@
   border-color: #d97706;
 }
 
+.dot.checked {
+  border-color: #d97706;
+  background: #d97706;
+  position: relative;
+}
+
+.dot.checked::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .status-card {
   flex: 1;
   border: 1.5px solid #333333;
