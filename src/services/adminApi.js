@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+import { apiRequest } from "./api";
 
 const CONFIGURED_PRODUCT_BUCKET = String(import.meta.env.VITE_SUPABASE_PRODUCT_BUCKET || "").trim();
 const DEFAULT_PRODUCT_BUCKET = "assets";
@@ -64,6 +65,207 @@ function normalizeDashboardRange(range) {
     return normalized;
   }
   return "WEEK";
+}
+
+function normalizeAnalyticsRange(range) {
+  const normalized = String(range || "").trim().toUpperCase();
+  if (normalized === "DAY" || normalized === "WEEK" || normalized === "MONTH" || normalized === "YEAR" || normalized === "ALL") {
+    return normalized;
+  }
+  return "WEEK";
+}
+
+function shouldFallbackAnalyticsToSupabase(error) {
+  const status = Number(error?.status || 0);
+  const message = String(error?.message || "").toLowerCase();
+
+  if (status === 404 || status >= 500) {
+    return true;
+  }
+
+  return (
+    message.includes("could not connect to the server")
+    || message.includes("failed to fetch")
+    || message.includes("networkerror")
+  );
+}
+
+function startOfUtcDay(date = new Date()) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+function analyticsRangeStartUtc(range) {
+  const normalizedRange = normalizeAnalyticsRange(range);
+  const todayUtc = startOfUtcDay(new Date());
+
+  if (normalizedRange === "DAY") {
+    return todayUtc;
+  }
+
+  if (normalizedRange === "WEEK") {
+    const mondayOffset = (todayUtc.getUTCDay() + 6) % 7;
+    const weekStart = new Date(todayUtc);
+    weekStart.setUTCDate(todayUtc.getUTCDate() - mondayOffset);
+    return weekStart;
+  }
+
+  if (normalizedRange === "MONTH") {
+    return new Date(Date.UTC(todayUtc.getUTCFullYear(), todayUtc.getUTCMonth(), 1));
+  }
+
+  if (normalizedRange === "YEAR") {
+    return new Date(Date.UTC(todayUtc.getUTCFullYear(), 0, 1));
+  }
+
+  return null;
+}
+
+function asTimestamp(value) {
+  if (!value) {
+    return Number.NaN;
+  }
+  return new Date(value).getTime();
+}
+
+function isInAnalyticsRange(effectiveAt, rangeStart) {
+  if (!rangeStart) {
+    return true;
+  }
+
+  const timestamp = asTimestamp(effectiveAt);
+  if (Number.isNaN(timestamp)) {
+    return false;
+  }
+
+  return timestamp >= rangeStart.getTime();
+}
+
+async function fetchAnalyticsSnapshotFromSupabase(timeRange = "WEEK") {
+  const normalizedRange = normalizeAnalyticsRange(timeRange);
+  const rangeStart = analyticsRangeStartUtc(normalizedRange);
+
+  const deliveredOrdersRes = await supabase
+    .from("orders")
+    .select("id, rider_id, total, created_at, delivered_at")
+    .eq("status", "DELIVERED");
+  assertNoError(deliveredOrdersRes.error, "Unable to load analytics orders");
+
+  const deliveredOrders = (deliveredOrdersRes.data || []).map((order) => ({
+    id: String(order.id),
+    riderId: order.rider_id ? String(order.rider_id) : "",
+    total: toNumber(order.total),
+    effectiveAt: order.delivered_at || order.created_at || "",
+  }));
+
+  const inRangeOrders = deliveredOrders.filter((order) => isInAnalyticsRange(order.effectiveAt, rangeStart));
+  const inRangeOrderIds = inRangeOrders.map((order) => order.id);
+
+  let orderItems = [];
+  if (inRangeOrderIds.length > 0) {
+    const orderItemsRes = await supabase
+      .from("order_items")
+      .select("order_id, product_id, quantity, unit_price, subtotal")
+      .in("order_id", inRangeOrderIds);
+    assertNoError(orderItemsRes.error, "Unable to load analytics order items");
+    orderItems = Array.isArray(orderItemsRes.data) ? orderItemsRes.data : [];
+  }
+
+  const productIds = Array.from(new Set(orderItems.map((item) => item?.product_id).filter(Boolean)));
+  let productsMap = new Map();
+  if (productIds.length > 0) {
+    const productsRes = await supabase
+      .from("products")
+      .select("id, name, category")
+      .in("id", productIds);
+    assertNoError(productsRes.error, "Unable to load analytics products");
+    productsMap = new Map((productsRes.data || []).map((product) => [String(product.id), product]));
+  }
+
+  const riderIds = Array.from(new Set(inRangeOrders.map((order) => order.riderId).filter(Boolean)));
+  let riderMap = new Map();
+  if (riderIds.length > 0) {
+    const ridersRes = await supabase
+      .from("users")
+      .select("id, full_name, username")
+      .in("id", riderIds);
+    assertNoError(ridersRes.error, "Unable to load analytics riders");
+    riderMap = new Map((ridersRes.data || []).map((rider) => [String(rider.id), rider]));
+  }
+
+  const categoryTotals = new Map();
+  const productTotals = new Map();
+
+  for (const item of orderItems) {
+    const productId = String(item?.product_id || "");
+    const product = productsMap.get(productId);
+    const category = String(product?.category || "UNCATEGORIZED");
+    const name = String(product?.name || "Unknown Product");
+    const quantity = toNumber(item?.quantity);
+    const unitPrice = toNumber(item?.unit_price);
+    const sales = item?.subtotal === null || item?.subtotal === undefined
+      ? unitPrice * quantity
+      : toNumber(item?.subtotal);
+
+    categoryTotals.set(category, (categoryTotals.get(category) || 0) + sales);
+
+    const key = productId || `${name}::${category}`;
+    const existingProduct = productTotals.get(key) || {
+      name,
+      category,
+      sales: 0,
+      quantity: 0,
+    };
+
+    existingProduct.sales += sales;
+    existingProduct.quantity += quantity;
+    productTotals.set(key, existingProduct);
+  }
+
+  const riderDeliveryTotals = new Map();
+  for (const order of inRangeOrders) {
+    if (!order.riderId) {
+      continue;
+    }
+    riderDeliveryTotals.set(order.riderId, (riderDeliveryTotals.get(order.riderId) || 0) + 1);
+  }
+
+  return {
+    range: normalizedRange,
+    totalRevenueAllTime: deliveredOrders.reduce((sum, order) => sum + order.total, 0),
+    totalRevenueInRange: inRangeOrders.reduce((sum, order) => sum + order.total, 0),
+    salesTrend: [],
+    categorySales: Array.from(categoryTotals.entries())
+      .map(([category, sales]) => ({
+        category,
+        sales: Number(sales),
+      }))
+      .sort((left, right) => right.sales - left.sales),
+    productSales: Array.from(productTotals.values())
+      .map((item) => ({
+        name: item.name,
+        category: item.category,
+        sales: Number(item.sales),
+        quantity: Number(item.quantity),
+      }))
+      .sort((left, right) => right.sales - left.sales)
+      .slice(0, 12),
+    topSellers: Array.from(productTotals.values())
+      .map((item) => ({
+        name: item.name,
+        quantity: Number(item.quantity),
+      }))
+      .sort((left, right) => right.quantity - left.quantity)
+      .slice(0, 5),
+    riderPerformance: Array.from(riderDeliveryTotals.entries())
+      .map(([riderId, completedDeliveries]) => {
+        const rider = riderMap.get(riderId);
+        return {
+          riderName: rider?.full_name || rider?.username || "Unknown Rider",
+          completedDeliveries: Number(completedDeliveries),
+        };
+      })
+      .sort((left, right) => right.completedDeliveries - left.completedDeliveries),
+  };
 }
 
 function buildRevenueBuckets(range) {
@@ -237,7 +439,7 @@ export async function fetchAdminDashboardSnapshot(range = "WEEK") {
 export async function fetchAdminOrdersHistory() {
   const ordersRes = await supabase
     .from("orders")
-    .select("id, user_id, rider_id, status, subtotal, delivery_fee, total, created_at, accepted_at, picked_up_at, arrived_at, delivered_at")
+    .select("id, user_id, rider_id, status, subtotal, delivery_fee, total, delivery_address, created_at, accepted_at, picked_up_at, arrived_at, delivered_at")
     .order("created_at", { ascending: false });
 
   assertNoError(ordersRes.error, "Unable to load orders history");
@@ -246,6 +448,8 @@ export async function fetchAdminOrdersHistory() {
   if (orders.length === 0) {
     return [];
   }
+
+  const orderIds = Array.from(new Set(orders.map((order) => order.id).filter(Boolean)));
 
   const customerIds = Array.from(new Set(orders.map((order) => order.user_id).filter(Boolean)));
   const riderIds = Array.from(new Set(orders.map((order) => order.rider_id).filter(Boolean)));
@@ -258,6 +462,50 @@ export async function fetchAdminOrdersHistory() {
     usersMap = new Map((usersRes.data || []).map((user) => [String(user.id), user]));
   }
 
+  let orderItems = [];
+  if (orderIds.length > 0) {
+    const orderItemsRes = await supabase
+      .from("order_items")
+      .select("order_id, product_id, quantity, unit_price, subtotal")
+      .in("order_id", orderIds);
+    assertNoError(orderItemsRes.error, "Unable to load order items");
+    orderItems = Array.isArray(orderItemsRes.data) ? orderItemsRes.data : [];
+  }
+
+  const productIds = Array.from(new Set(orderItems.map((item) => item.product_id).filter(Boolean)));
+  let productsMap = new Map();
+  if (productIds.length > 0) {
+    const productsRes = await supabase.from("products").select("id, name").in("id", productIds);
+    assertNoError(productsRes.error, "Unable to load product names");
+    productsMap = new Map((productsRes.data || []).map((product) => [String(product.id), product]));
+  }
+
+  const itemsByOrderId = new Map();
+  for (const item of orderItems) {
+    const orderId = String(item?.order_id || "");
+    if (!orderId) {
+      continue;
+    }
+
+    const quantity = toNumber(item?.quantity);
+    const unitPrice = toNumber(item?.unit_price);
+    const computedSubtotal = item?.subtotal === null || item?.subtotal === undefined
+      ? unitPrice * quantity
+      : toNumber(item?.subtotal);
+    const productId = String(item?.product_id || "");
+    const productName = productsMap.get(productId)?.name || "Unknown Product";
+
+    const existing = itemsByOrderId.get(orderId) || [];
+    existing.push({
+      productId,
+      name: productName,
+      quantity,
+      unitPrice,
+      subtotal: computedSubtotal,
+    });
+    itemsByOrderId.set(orderId, existing);
+  }
+
   return orders.map((order) => {
     const customer = usersMap.get(String(order.user_id));
     const rider = usersMap.get(String(order.rider_id));
@@ -266,16 +514,19 @@ export async function fetchAdminOrdersHistory() {
       id: String(order.id),
       status: String(order.status || "PENDING").toUpperCase(),
       customerName: customer?.full_name || customer?.username || "Unknown Customer",
+      riderId: order.rider_id ? String(order.rider_id) : "",
       riderName: rider?.full_name || rider?.username || "Unassigned",
       riderRole: String(rider?.role || "").toUpperCase(),
       subtotal: toNumber(order.subtotal),
       deliveryFee: toNumber(order.delivery_fee),
       total: toNumber(order.total),
+      deliveryAddress: String(order.delivery_address || "").trim(),
       createdAt: order.created_at || "",
       acceptedAt: order.accepted_at || "",
       pickedUpAt: order.picked_up_at || "",
       arrivedAt: order.arrived_at || "",
       deliveredAt: order.delivered_at || "",
+      items: itemsByOrderId.get(String(order.id)) || [],
     };
   });
 }
@@ -393,81 +644,78 @@ export async function addInventoryProduct({ name, category, pricePhp, descriptio
   return mapProductRow(insertRes.data);
 }
 
-export async function fetchAnalyticsSnapshot() {
-  const deliveredOrdersRes = await supabase.from("orders").select("id, rider_id").eq("status", "DELIVERED");
-  assertNoError(deliveredOrdersRes.error, "Unable to load delivered orders");
-
-  const deliveredOrders = deliveredOrdersRes.data || [];
-  const deliveredOrderIds = deliveredOrders.map((order) => String(order.id));
-
-  let orderItems = [];
-  if (deliveredOrderIds.length > 0) {
-    const orderItemsRes = await supabase
-      .from("order_items")
-      .select("order_id, product_id, quantity, subtotal")
-      .in("order_id", deliveredOrderIds);
-    assertNoError(orderItemsRes.error, "Unable to load delivered order items");
-    orderItems = orderItemsRes.data || [];
-  }
-
-  const productIds = Array.from(new Set(orderItems.map((item) => String(item.product_id)).filter(Boolean)));
-  let productsMap = new Map();
-  if (productIds.length > 0) {
-    const productsRes = await supabase.from("products").select("id, name, category").in("id", productIds);
-    assertNoError(productsRes.error, "Unable to load products for analytics");
-    productsMap = new Map((productsRes.data || []).map((product) => [String(product.id), product]));
-  }
-
-  const categorySalesMap = new Map();
-  const topSellersMap = new Map();
-
-  for (const item of orderItems) {
-    const product = productsMap.get(String(item.product_id));
-    const category = product?.category || "UNCATEGORIZED";
-    const productName = product?.name || "Unknown Product";
-
-    categorySalesMap.set(category, (categorySalesMap.get(category) || 0) + toNumber(item.subtotal));
-
-    const currentTop = topSellersMap.get(productName) || { name: productName, quantity: 0 };
-    topSellersMap.set(productName, {
-      name: productName,
-      quantity: currentTop.quantity + toNumber(item.quantity),
+export async function fetchAnalyticsSnapshot(timeRange = "WEEK") {
+  const normalizedRange = normalizeAnalyticsRange(timeRange);
+  try {
+    const payload = await apiRequest("/api/admin/analytics", {
+      query: { timeRange: normalizedRange, range: normalizedRange },
     });
-  }
 
-  const riderCounts = new Map();
-  for (const order of deliveredOrders) {
-    if (!order.rider_id) {
-      continue;
+    return {
+      range: String(payload?.range || normalizedRange).toUpperCase(),
+      totalRevenueAllTime: toNumber(payload?.totalRevenueAllTime),
+      totalRevenueInRange: toNumber(payload?.totalRevenueInRange),
+      salesTrend: (payload?.salesTrend || []).map((point) => ({
+        label: String(point?.label || ""),
+        revenue: toNumber(point?.revenue),
+      })),
+      categorySales: (payload?.categorySales || [])
+        .map((item) => ({
+          category: String(item?.category || "UNCATEGORIZED"),
+          sales: toNumber(item?.sales),
+        }))
+        .sort((left, right) => right.sales - left.sales),
+      productSales: (payload?.productSales || [])
+        .map((item) => ({
+          name: String(item?.productName || "Unknown Product"),
+          category: String(item?.category || "UNCATEGORIZED"),
+          sales: toNumber(item?.sales),
+          quantity: Number(item?.quantity || 0),
+        }))
+        .sort((left, right) => right.sales - left.sales),
+      topSellers: (payload?.topSellers || [])
+        .map((item) => ({
+          name: String(item?.name || "Unknown Product"),
+          quantity: Number(item?.quantity || 0),
+        }))
+        .sort((left, right) => right.quantity - left.quantity)
+        .slice(0, 5),
+      riderPerformance: (payload?.riderPerformance || [])
+        .map((entry) => ({
+          riderName: String(entry?.riderName || "Unknown Rider"),
+          completedDeliveries: Number(entry?.completedDeliveries || 0),
+        }))
+        .sort((left, right) => right.completedDeliveries - left.completedDeliveries),
+    };
+  } catch (error) {
+    if (!shouldFallbackAnalyticsToSupabase(error)) {
+      throw error;
     }
-    riderCounts.set(String(order.rider_id), (riderCounts.get(String(order.rider_id)) || 0) + 1);
-  }
 
-  const riderIds = Array.from(riderCounts.keys());
-  let ridersMap = new Map();
-  if (riderIds.length > 0) {
-    const ridersRes = await supabase.from("users").select("id, full_name, username").in("id", riderIds);
-    assertNoError(ridersRes.error, "Unable to load rider performance data");
-    ridersMap = new Map((ridersRes.data || []).map((rider) => [String(rider.id), rider]));
+    return fetchAnalyticsSnapshotFromSupabase(normalizedRange);
   }
+}
 
-  return {
-    categorySales: Array.from(categorySalesMap.entries())
-      .map(([category, sales]) => ({ category, sales: Number(sales.toFixed(2)) }))
-      .sort((a, b) => b.sales - a.sales),
-    topSellers: Array.from(topSellersMap.values())
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 5),
-    riderPerformance: riderIds
-      .map((riderId) => {
-        const rider = ridersMap.get(riderId);
-        return {
-          riderName: rider?.full_name || rider?.username || "Unknown Rider",
-          completedDeliveries: riderCounts.get(riderId) || 0,
-        };
-      })
-      .sort((a, b) => b.completedDeliveries - a.completedDeliveries),
-  };
+export async function fetchAdminRiders() {
+  const ridersRes = await supabase
+    .from("users")
+    .select("id, full_name, username, email, phone, role, is_online, working_shift, created_at")
+    .eq("role", "RIDER")
+    .order("created_at", { ascending: false });
+
+  assertNoError(ridersRes.error, "Unable to load riders");
+
+  return (ridersRes.data || []).map((row) => ({
+    id: String(row.id),
+    fullName: row.full_name || row.username || "Unknown Rider",
+    username: row.username || "",
+    email: row.email || "",
+    phone: row.phone || "",
+    role: String(row.role || "RIDER").toUpperCase(),
+    online: Boolean(row.is_online),
+    workingShift: String(row.working_shift || "").toUpperCase() || "UNSET",
+    createdAt: row.created_at || "",
+  }));
 }
 
 export async function fetchLowStockProducts(threshold = 5) {

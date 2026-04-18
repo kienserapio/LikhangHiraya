@@ -34,7 +34,9 @@ import AdminDashboardPage from "./pages/admin/Dashboard";
 import AdminInventoryPage from "./pages/admin/Inventory";
 import AdminInventoryAddPage from "./pages/admin/InventoryAddProduct";
 import AdminAnalyticsPage from "./pages/admin/Analytics";
-import AdminOrdersHistoryPage from "./pages/admin/OrdersHistory";
+import AdminOrdersActivePage from "./pages/admin/OrdersActive";
+import AdminOrdersRecentPage from "./pages/admin/OrdersRecent";
+import AdminActiveRidersPage from "./pages/admin/ActiveRiders";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuthStore } from "./store/authStore";
 
@@ -88,7 +90,10 @@ export default function App() {
         <Route path="inventory" element={<AdminInventoryPage />} />
         <Route path="inventory/new" element={<AdminInventoryAddPage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />
-        <Route path="orders" element={<AdminOrdersHistoryPage />} />
+        <Route path="riders" element={<AdminActiveRidersPage />} />
+        <Route path="orders" element={<Navigate to="/admin/orders/active" replace />} />
+        <Route path="orders/active" element={<AdminOrdersActivePage />} />
+        <Route path="orders/recent" element={<AdminOrdersRecentPage />} />
       </Route>
     </Routes>
   );

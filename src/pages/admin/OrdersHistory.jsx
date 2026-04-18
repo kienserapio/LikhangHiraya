@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { fetchAdminOrdersHistory } from "../../services/adminApi";
 import { supabase } from "../../services/supabaseClient";
 import adminStyles from "./Admin.module.css";
@@ -8,6 +9,19 @@ const GROUP_BY_OPTIONS = [
   { value: "DATE", label: "Date" },
   { value: "DAY", label: "Day" },
   { value: "MONTH", label: "Month" },
+];
+
+const STATUS_FILTER_OPTIONS = [
+  { value: "ALL", label: "All Statuses" },
+  { value: "PENDING", label: "Pending" },
+  { value: "CONFIRMED", label: "Confirmed" },
+  { value: "PREPARING", label: "Preparing" },
+  { value: "RIDER_ASSIGNED", label: "Rider Assigned" },
+  { value: "PICKED_UP", label: "Picked Up" },
+  { value: "IN_TRANSIT", label: "In Transit" },
+  { value: "ARRIVED", label: "Arrived" },
+  { value: "DELIVERED", label: "Delivered" },
+  { value: "CANCELLED", label: "Cancelled" },
 ];
 
 const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -98,12 +112,23 @@ function getGroupMeta(order, groupBy) {
   };
 }
 
+function normalizeStatusFilter(value) {
+  const normalized = String(value || "ALL").trim().toUpperCase();
+  return STATUS_FILTER_OPTIONS.some((option) => option.value === normalized) ? normalized : "ALL";
+}
+
 export default function OrdersHistory() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
   const [groupBy, setGroupBy] = useState("DATE");
   const [sortDirection, setSortDirection] = useState("DESC");
+  const [statusFilter, setStatusFilter] = useState(normalizeStatusFilter(searchParams.get("status")));
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    setStatusFilter(normalizeStatusFilter(searchParams.get("status")));
+  }, [searchParams]);
 
   const loadOrders = useCallback(async (background = false) => {
     if (!background) {
@@ -141,10 +166,36 @@ export default function OrdersHistory() {
     };
   }, [loadOrders]);
 
+  const filteredOrders = useMemo(() => {
+    if (statusFilter === "ALL") {
+      return orders;
+    }
+
+    return orders.filter((order) => String(order?.status || "").toUpperCase() === statusFilter);
+  }, [orders, statusFilter]);
+
+  const activeStatusLabel = useMemo(
+    () => STATUS_FILTER_OPTIONS.find((option) => option.value === statusFilter)?.label || "All Statuses",
+    [statusFilter]
+  );
+
+  function handleStatusFilterChange(value) {
+    const normalized = normalizeStatusFilter(value);
+    setStatusFilter(normalized);
+
+    const nextSearchParams = new URLSearchParams(searchParams);
+    if (normalized === "ALL") {
+      nextSearchParams.delete("status");
+    } else {
+      nextSearchParams.set("status", normalized);
+    }
+    setSearchParams(nextSearchParams, { replace: true });
+  }
+
   const groupedOrders = useMemo(() => {
     const groupMap = new Map();
 
-    for (const order of orders) {
+    for (const order of filteredOrders) {
       const meta = getGroupMeta(order, groupBy);
       const existing = groupMap.get(meta.key);
       if (existing) {
@@ -180,11 +231,11 @@ export default function OrdersHistory() {
     }
 
     return grouped;
-  }, [groupBy, orders, sortDirection]);
+  }, [filteredOrders, groupBy, sortDirection]);
 
   const totalRevenue = useMemo(
-    () => orders.reduce((sum, order) => sum + Number(order.total || 0), 0),
-    [orders]
+    () => filteredOrders.reduce((sum, order) => sum + Number(order.total || 0), 0),
+    [filteredOrders]
   );
 
   return (
@@ -192,7 +243,7 @@ export default function OrdersHistory() {
       <header className={styles.header}>
         <div>
           <h2 className={styles.title}>Orders History</h2>
-          <p className={styles.subtitle}>View all orders and sort them by day, date, or month.</p>
+          <p className={styles.subtitle}>Status: {activeStatusLabel}. Sort by day, date, or month.</p>
         </div>
 
         <div className={styles.headerActions}>
@@ -207,7 +258,7 @@ export default function OrdersHistory() {
       <div className={styles.metricsRow}>
         <article className={styles.metricCard}>
           <p>Total Orders</p>
-          <strong>{orders.length}</strong>
+          <strong>{filteredOrders.length}</strong>
         </article>
         <article className={styles.metricCard}>
           <p>Total Revenue</p>
@@ -238,6 +289,19 @@ export default function OrdersHistory() {
           >
             <option value="DESC">Descending</option>
             <option value="ASC">Ascending</option>
+          </select>
+        </div>
+
+        <div className={styles.controlField}>
+          <label htmlFor="orders-history-status">Status Filter</label>
+          <select
+            id="orders-history-status"
+            value={statusFilter}
+            onChange={(event) => handleStatusFilterChange(event.target.value)}
+          >
+            {STATUS_FILTER_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
           </select>
         </div>
       </section>

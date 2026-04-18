@@ -71,6 +71,18 @@
   box-shadow: 0 10px 24px -22px rgba(28, 27, 27, 0.35);
 }
 
+.kpiCardLink {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.22s ease;
+}
+
+.kpiCardLink:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 28px -20px rgba(73, 48, 28, 0.55);
+}
+
 .kpiCardButton {
   text-align: left;
   font: inherit;

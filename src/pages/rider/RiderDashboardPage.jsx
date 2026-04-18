@@ -11,6 +11,7 @@ import { useNewOrders } from "../../hooks/useNewOrders";
 import { useAuthStore } from "../../store/authStore";
 import RiderBottomNav from "../../components/rider/RiderBottomNav";
 import RiderPageLoader from "../../components/rider/RiderPageLoader";
+import { HIRAYA_LOGO_URL } from "../../constants/branding";
 import styles from "./RiderDashboard.module.css";
 
 function toPeso(value) {
@@ -278,7 +279,7 @@ export default function RiderDashboardPage() {
     <div className={styles.page}>
       <header className={styles.topBar}>
         <div className={styles.brand}>
-          <img className={styles.brandLogo} src="/assets/hiraya.png" alt="Likhang Hiraya" />
+          <img className={styles.brandLogo} src={HIRAYA_LOGO_URL} alt="Likhang Hiraya" />
           <h1 className={styles.brandName}>Likhang Hiraya</h1>
         </div>
         <div className={styles.onlineStatus} aria-live="polite">

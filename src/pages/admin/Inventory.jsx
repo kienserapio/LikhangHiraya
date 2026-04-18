@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import ExportButtonGroup from "../../components/admin/ExportButtonGroup";
 import {
   fetchInventoryProducts,
   quickEditProduct,
   restockProduct,
 } from "../../services/adminApi";
 import { supabase } from "../../services/supabaseClient";
+import { exportRowsToExcel, exportRowsToPdf } from "../../utils/adminExports";
 import adminStyles from "./Admin.module.css";
 import styles from "./Inventory.module.css";
 
@@ -143,6 +145,30 @@ export default function Inventory() {
     return filteredProducts.slice(start, start + ROWS_PER_PAGE);
   }, [currentPage, filteredProducts]);
 
+  const inventoryExportRows = useMemo(
+    () => filteredProducts.map((product) => ({
+      product: product.name,
+      sku: buildSku(product),
+      category: product.category,
+      price: toPeso(product.pricePhp),
+      stock: Number(product.stockQuantity || 0),
+      availability: product.status,
+    })),
+    [filteredProducts]
+  );
+
+  const inventoryExportColumns = useMemo(
+    () => [
+      { key: "product", label: "Product" },
+      { key: "sku", label: "SKU" },
+      { key: "category", label: "Category" },
+      { key: "price", label: "Price" },
+      { key: "stock", label: "Stock" },
+      { key: "availability", label: "Availability" },
+    ],
+    []
+  );
+
   const viewStart = filteredProducts.length === 0 ? 0 : (currentPage - 1) * ROWS_PER_PAGE + 1;
   const viewEnd = filteredProducts.length === 0 ? 0 : Math.min(currentPage * ROWS_PER_PAGE, filteredProducts.length);
 
@@ -220,6 +246,24 @@ export default function Inventory() {
     setSearchParams(nextParams);
   }
 
+  function exportInventoryPdf() {
+    exportRowsToPdf({
+      title: "Inventory Table",
+      rows: inventoryExportRows,
+      columns: inventoryExportColumns,
+      fileName: "likhang-hiraya-inventory-table",
+    });
+  }
+
+  function exportInventoryExcel() {
+    exportRowsToExcel({
+      rows: inventoryExportRows,
+      columns: inventoryExportColumns,
+      fileName: "likhang-hiraya-inventory-table",
+      sheetName: "Inventory",
+    });
+  }
+
   return (
     <section className={styles.inventoryPage}>
       <header className={styles.pageHeader}>
@@ -284,11 +328,19 @@ export default function Inventory() {
             })}
           </div>
 
-          {lowStockOnly ? (
-            <button type="button" className={styles.lowStockFilterBadge} onClick={clearLowStockFilter}>
-              Low stock filter active (≤ 5) · Clear
-            </button>
-          ) : null}
+          <div className={styles.tableHeaderActions}>
+            {lowStockOnly ? (
+              <button type="button" className={styles.lowStockFilterBadge} onClick={clearLowStockFilter}>
+                Low stock filter active (≤ 5) · Clear
+              </button>
+            ) : null}
+            <ExportButtonGroup
+              compact
+              disabled={inventoryExportRows.length === 0}
+              onExportPdf={exportInventoryPdf}
+              onExportExcel={exportInventoryExcel}
+            />
+          </div>
         </div>
 
         <div className={styles.tableWrap}>

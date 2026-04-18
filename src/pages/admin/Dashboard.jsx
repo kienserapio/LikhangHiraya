@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CartesianGrid,
   Line,
@@ -193,29 +193,29 @@ export default function Dashboard() {
       {error ? <p className={adminStyles.error}>{error}</p> : null}
 
       <div className={styles.kpiGrid}>
-        <article className={styles.kpiCard}>
+        <Link to="/admin/orders/active" className={`${styles.kpiCard} ${styles.kpiCardLink}`.trim()}>
           <div className={styles.kpiIconBubble} aria-hidden="true">🛒</div>
           <p className={styles.kpiLabel}>Today's Orders</p>
           <p className={styles.kpiValue}>{dashboard.kpis.todaysOrders}</p>
-        </article>
+        </Link>
 
-        <article className={styles.kpiCard}>
+        <Link to="/admin/analytics" className={`${styles.kpiCard} ${styles.kpiCardLink}`.trim()}>
           <div className={styles.kpiIconBubble} aria-hidden="true">₱</div>
           <p className={styles.kpiLabel}>Today's Revenue</p>
           <p className={styles.kpiValue}>{toPeso(dashboard.kpis.todaysRevenue)}</p>
-        </article>
+        </Link>
 
-        <article className={styles.kpiCard}>
+        <Link to="/admin/riders" className={`${styles.kpiCard} ${styles.kpiCardLink}`.trim()}>
           <div className={styles.kpiIconBubble} aria-hidden="true">🛵</div>
           <p className={styles.kpiLabel}>Active Riders</p>
           <p className={styles.kpiValue}>{dashboard.kpis.activeRiders}</p>
-        </article>
+        </Link>
 
-        <article className={styles.kpiCard}>
+        <Link to="/admin/orders/active?status=PENDING" className={`${styles.kpiCard} ${styles.kpiCardLink}`.trim()}>
           <div className={styles.kpiIconBubble} aria-hidden="true">⏳</div>
           <p className={styles.kpiLabel}>Pending Orders</p>
           <p className={styles.kpiValue}>{dashboard.kpis.pendingOrders}</p>
-        </article>
+        </Link>
 
         <button
           type="button"
@@ -278,7 +278,7 @@ export default function Dashboard() {
               <button type="button" className={styles.viewAllButton} onClick={() => loadDashboard(false)}>
                 Refresh List
               </button>
-              <button type="button" className={styles.viewAllButton} onClick={() => navigate("/admin/orders")}>View Full History</button>
+              <button type="button" className={styles.viewAllButton} onClick={() => navigate("/admin/orders/active")}>View Active Missions</button>
             </div>
           </div>
 
@@ -345,7 +345,7 @@ export default function Dashboard() {
             </div>
             <div className={styles.panelActions}>
               <button type="button" className={styles.viewAllButton} onClick={() => loadDashboard(false)}>Refresh</button>
-              <button type="button" className={styles.viewAllButton} onClick={() => navigate("/admin/orders")}>Open History</button>
+              <button type="button" className={styles.viewAllButton} onClick={() => navigate("/admin/orders/recent")}>Open History</button>
             </div>
           </div>
 

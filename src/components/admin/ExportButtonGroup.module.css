@@ -1,0 +1,41 @@
+.group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.groupCompact {
+  gap: 6px;
+}
+
+.button {
+  border: 1px solid #d4c3ba;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #553722;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 7px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #f8f3ef;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button svg {
+  width: 15px;
+  height: 15px;
+}
