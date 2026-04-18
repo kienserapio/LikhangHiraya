@@ -1,42 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuthStore } from "../store/authStore";
 import UniversalBottomNav from "../components/UniversalBottomNav";
 import LocationHeader from "../components/LocationHeader";
 import ActiveOrdersDock from "../components/ActiveOrdersDock";
 import ProductDetailModal from "../components/ProductDetailModal";
 import ProductCard from "../components/ProductCard";
-import { productApi } from "../services/api";
+import { useProductsQuery } from "../hooks/useProductsQuery";
 import "./HomePage.css";
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [searchText, setSearchText] = useState("");
-  const [products, setProducts] = useState([]);
-  const [loadError, setLoadError] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const { data: products = [], isLoading, error } = useProductsQuery();
+  const loadError = error?.message || "";
   const profile = useAuthStore((state) => state.profile);
-
-  useEffect(() => {
-    let isMounted = true;
-    productApi
-      .list()
-      .then((data) => {
-        if (isMounted) {
-          setProducts(data);
-          setLoadError("");
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setProducts([]);
-          setLoadError(error.message || "Unable to load products from backend. Check API and Supabase connection.");
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const categories = useMemo(() => {
     const unique = new Set(products.map((product) => product.category).filter(Boolean));
@@ -72,6 +50,9 @@ export default function HomePage() {
 
         <div className="menu-grid" id="menu-grid">
           {loadError ? <p style={{ gridColumn: "1 / -1", color: "#b91c1c", fontWeight: 700 }}>{loadError}</p> : null}
+          {isLoading && !loadError ? (
+            <p style={{ gridColumn: "1 / -1", color: "#6b7280", fontWeight: 600 }}>Loading menu...</p>
+          ) : null}
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} onOpenDetail={setSelectedProduct} />
           ))}

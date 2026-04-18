@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CartesianGrid,
@@ -72,6 +72,20 @@ const DASHBOARD_RANGE_OPTIONS = [
   { value: "MONTH", label: "Monthly" },
   { value: "YEAR", label: "Yearly" },
 ];
+
+const RevenueTrendLineChart = memo(function RevenueTrendLineChart({ data }) {
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+        <XAxis dataKey="label" />
+        <YAxis tickFormatter={(value) => `P${Number(value).toLocaleString()}`} />
+        <Tooltip formatter={(value) => toPeso(value)} />
+        <Line type="monotone" dataKey="revenue" stroke="#6f4e37" strokeWidth={3} dot={{ r: 3 }} />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+});
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -256,15 +270,7 @@ export default function Dashboard() {
           </div>
 
           <div className={styles.chartBox}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dashboard.revenueTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="label" />
-                <YAxis tickFormatter={(value) => `P${Number(value).toLocaleString()}`} />
-                <Tooltip formatter={(value) => toPeso(value)} />
-                <Line type="monotone" dataKey="revenue" stroke="#6f4e37" strokeWidth={3} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            <RevenueTrendLineChart data={dashboard.revenueTrend} />
           </div>
         </section>
 

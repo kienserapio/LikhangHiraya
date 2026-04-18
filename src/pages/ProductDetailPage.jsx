@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCartStore } from "../store/cartStore";
 import { useFavoriteStore } from "../store/favoriteStore";
-import { productApi } from "../services/api";
+import { useProductsQuery } from "../hooks/useProductsQuery";
 import "./ProductDetailPage.css";
 
 const sizes = ["Small", "Medium", "Large"];
@@ -20,8 +20,8 @@ function toPeso(value) {
 export default function ProductDetailPage() {
   const navigate = useNavigate();
   const { productId } = useParams();
-  const [products, setProducts] = useState([]);
-  const [loadError, setLoadError] = useState("");
+  const { data: products = [], error } = useProductsQuery();
+  const loadError = error?.message || "";
   const [selectedSize, setSelectedSize] = useState("Small");
   const [notes] = useState("");
   const [toppingQty, setToppingQty] = useState({});
@@ -29,28 +29,6 @@ export default function ProductDetailPage() {
   const addItem = useCartStore((state) => state.addItem);
   const isFavorite = useFavoriteStore((state) => state.isFavorite);
   const toggleFavorite = useFavoriteStore((state) => state.toggleFavorite);
-
-  useEffect(() => {
-    let isMounted = true;
-    productApi
-      .list()
-      .then((data) => {
-        if (isMounted) {
-          setProducts(data);
-          setLoadError("");
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setProducts([]);
-          setLoadError(error.message || "Unable to load product details from backend.");
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const product = products.find((item) => String(item.id) === String(productId)) || products[0];
 

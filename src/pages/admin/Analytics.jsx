@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -85,6 +85,27 @@ function revenueFromDashboard(range, dashboardSnapshot) {
   const lastPoint = revenueTrend[revenueTrend.length - 1];
   return Number(lastPoint?.revenue || 0);
 }
+
+const CategorySalesBarChart = memo(function CategorySalesBarChart({ data }) {
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+        <XAxis dataKey="category" />
+        <YAxis tickFormatter={(value) => `P${Number(value).toLocaleString("en-PH")}`} />
+        <Tooltip formatter={(value) => toPeso(value)} />
+        <Bar
+          dataKey="sales"
+          fill="#6f4e37"
+          radius={[8, 8, 0, 0]}
+          isAnimationActive
+          animationDuration={380}
+          animationEasing="ease-out"
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+});
 
 export default function Analytics() {
   const [analytics, setAnalytics] = useState(INITIAL_ANALYTICS);
@@ -457,22 +478,7 @@ export default function Analytics() {
               <p className={styles.emptyState}>No category sales data for the selected filters.</p>
             ) : (
               <div className={styles.chartBox}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={filteredCategorySales}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="category" />
-                    <YAxis tickFormatter={(value) => `P${Number(value).toLocaleString("en-PH")}`} />
-                    <Tooltip formatter={(value) => toPeso(value)} />
-                    <Bar
-                      dataKey="sales"
-                      fill="#6f4e37"
-                      radius={[8, 8, 0, 0]}
-                      isAnimationActive
-                      animationDuration={380}
-                      animationEasing="ease-out"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                <CategorySalesBarChart data={filteredCategorySales} />
               </div>
             )}
           </article>

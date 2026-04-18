@@ -325,3 +325,417 @@
     grid-template-columns: 1fr;
   }
 }
+
+.activeMissionPage {
+  padding-top: 16px;
+  padding-bottom: 220px;
+}
+
+.activeMissionShell {
+  max-width: 620px;
+}
+
+.activeMissionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.activeMissionHeader h1 {
+  margin: 0;
+  color: #553722;
+  font-size: clamp(1.35rem, 3.2vw, 1.8rem);
+  letter-spacing: -0.02em;
+}
+
+.activeMissionSubhead {
+  margin: 6px 0 0;
+  color: #82746d;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.activeMissionCard {
+  margin-top: 16px;
+  border-radius: 22px;
+  border: 1px solid #e6e1e1;
+  background: #ffffff;
+  box-shadow: 0 16px 28px rgba(85, 55, 34, 0.08);
+  padding: 18px;
+}
+
+.activeMissionProgressLine {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.activeMissionProgressTrack {
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: #e6e1e1;
+  overflow: hidden;
+}
+
+.activeMissionProgressFill {
+  height: 100%;
+  background: #6f4e37;
+  transition: width 0.3s ease;
+}
+
+.activeMissionSteps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.activeMissionStep {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  font-size: 0.63rem;
+  font-weight: 800;
+  color: #82746d;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.activeMissionStepActive {
+  color: #553722;
+}
+
+.activeMissionStepDot {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #82746d;
+  background: #ece7e7;
+  border: 1px solid #d8d0cc;
+}
+
+.activeMissionStepDot svg {
+  width: 18px;
+  height: 18px;
+}
+
+.activeMissionStepCurrent {
+  background: #6f4e37;
+  color: #ffffff;
+  border-color: #6f4e37;
+  box-shadow: 0 0 0 4px #ffdcc6;
+}
+
+.activeMissionStepDone {
+  background: #553722;
+  color: #ffffff;
+  border-color: #553722;
+}
+
+.activeMissionEtaCard {
+  margin-top: 18px;
+  border-radius: 16px;
+  background: #f7f2f2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.activeMissionEtaIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #e6e1e1;
+  display: grid;
+  place-items: center;
+  color: #553722;
+}
+
+.activeMissionEtaIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.activeMissionEtaLabel {
+  margin: 0;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #82746d;
+  font-weight: 800;
+}
+
+.activeMissionEtaValue {
+  margin: 4px 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #553722;
+}
+
+.activeMissionCustomerHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.activeMissionCustomerIdentity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.activeMissionCustomerAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #f1edec;
+  color: #50453e;
+  display: grid;
+  place-items: center;
+}
+
+.activeMissionCustomerAvatar svg {
+  width: 24px;
+  height: 24px;
+}
+
+.activeMissionCustomerName {
+  margin: 0;
+  color: #1c1b1b;
+  font-size: 1.15rem;
+}
+
+.activeMissionCustomerPhone {
+  margin: 4px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #50453e;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.activeMissionInlineIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  color: #6f4e37;
+}
+
+.activeMissionInlineIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.activeMissionAddressRow {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.activeMissionAddressTitle {
+  margin: 0;
+  color: #1c1b1b;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.activeMissionItemsSection {
+  margin-top: 18px;
+}
+
+.activeMissionItemsHeading {
+  margin: 0;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #82746d;
+}
+
+.activeMissionItemsList {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.activeMissionItemRow {
+  border-radius: 14px;
+  background: #f7f2f2;
+  border: 1px solid #ece7e7;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.activeMissionItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.activeMissionItemQty {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #e6e1e1;
+  color: #553722;
+  font-size: 0.83rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  text-transform: uppercase;
+}
+
+.activeMissionItemTextBlock {
+  min-width: 0;
+}
+
+.activeMissionItemName {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #1c1b1b;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.activeMissionItemPrice {
+  margin: 0;
+  color: #553722;
+  font-size: 0.95rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.activeMissionStickyActions {
+  position: sticky;
+  bottom: 102px;
+  margin-top: 18px;
+  z-index: 45;
+}
+
+.activeMissionStickyInner {
+  border-radius: 20px;
+  background: rgba(253, 248, 248, 0.92);
+  border: 1px solid rgba(230, 225, 225, 0.8);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 30px rgba(85, 55, 34, 0.12);
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.activeMissionNavigateBtn,
+.activeMissionUpdateBtn {
+  border: 0;
+  border-radius: 16px;
+  min-height: 54px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+
+.activeMissionNavigateBtn {
+  background: #ffffff;
+  color: #1c1b1b;
+  border: 1px solid #e6e1e1;
+}
+
+.activeMissionUpdateBtn {
+  background: linear-gradient(140deg, #553722, #6f4e37);
+  color: #ffffff;
+}
+
+.activeMissionUpdateBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.activeMissionButtonIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+}
+
+.activeMissionButtonIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.activeMissionStatusCard {
+  border: 1px solid #e6d9ce;
+  background: #fff7ef;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.activeMissionStatusTitle {
+  margin: 0;
+  color: #7c4f34;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.activeMissionStatusText {
+  margin: 6px 0 0;
+  color: #50453e;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 760px) {
+  .activeMissionPage {
+    padding-bottom: 212px;
+  }
+
+  .activeMissionHeader {
+    align-items: flex-start;
+  }
+
+  .activeMissionHeader h1 {
+    font-size: 1.3rem;
+  }
+
+  .activeMissionSteps {
+    gap: 6px;
+  }
+
+  .activeMissionStep {
+    font-size: 0.57rem;
+  }
+
+  .activeMissionStepDot {
+    width: 34px;
+    height: 34px;
+  }
+
+  .activeMissionStepDot svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .activeMissionStickyActions {
+    bottom: 92px;
+  }
+}
